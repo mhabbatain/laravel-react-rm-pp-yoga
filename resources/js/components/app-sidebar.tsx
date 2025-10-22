@@ -10,10 +10,17 @@ import {
     SidebarMenuButton,
     SidebarMenuItem,
 } from '@/components/ui/sidebar';
-import { dashboard } from '@/routes';
+import { daftarMenu, daftarPesanan, dashboard, karyawan, pos } from '@/routes';
 import { type NavItem } from '@/types';
 import { Link } from '@inertiajs/react';
-import { BookOpen, Folder, LayoutGrid } from 'lucide-react';
+import {
+    BookOpen,
+    FileText,
+    LayoutGrid,
+    Store,
+    UsersRound,
+    Utensils,
+} from 'lucide-react';
 import AppLogo from './app-logo';
 
 const mainNavItems: NavItem[] = [
@@ -22,14 +29,29 @@ const mainNavItems: NavItem[] = [
         href: dashboard(),
         icon: LayoutGrid,
     },
+    {
+        title: 'POS',
+        href: pos(),
+        icon: Store,
+    },
+    {
+        title: 'Daftar Pesanan',
+        href: daftarPesanan(),
+        icon: FileText,
+    },
+    {
+        title: 'Karyawan',
+        href: karyawan(),
+        icon: UsersRound,
+    },
+    {
+        title: 'Daftar Menu',
+        href: daftarMenu(),
+        icon: Utensils,
+    },
 ];
 
 const footerNavItems: NavItem[] = [
-    {
-        title: 'Repository',
-        href: 'https://github.com/laravel/react-starter-kit',
-        icon: Folder,
-    },
     {
         title: 'Documentation',
         href: 'https://laravel.com/docs/starter-kits#react',

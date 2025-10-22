@@ -16,6 +16,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
     })->name('dashboard');
 });
 
+Route::get('/pos', fn() => inertia('POS'))->name('pos');
+Route::get('/daftar-pesanan', fn() => inertia('daftar-pesanan'))->name('daftar-pesanan');
+Route::get('/daftar-pesanan/{id}', fn($id) => inertia('detail-daftar-pesanan', ['id' => $id]))->name('detail-daftar-pesanan');
 
+Route::get('/karyawan', fn() => inertia('karyawan'))->name('karyawan');
+Route::get('/daftar-menu', fn() => inertia('daftar-menu'))->name('daftar-menu');
 
-require __DIR__.'/settings.php';
+require __DIR__ . '/settings.php';
