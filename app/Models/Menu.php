@@ -9,11 +9,22 @@ class Menu extends Model
 {
     /** @use HasFactory<\Database\Factories\MenuFactory> */
     use HasFactory;
-    /**
-     * Get the kategori that owns the menu.
-     */
+
+    protected $fillable = [
+        'gambar',
+        'nama_menu',
+        'harga',
+        'stok',
+        'id_kategori'
+    ];
+
     public function kategori()
     {
         return $this->belongsTo(Kategori::class, 'id_kategori');
+    }
+
+    public function detail_pesanan()
+    {
+        return $this->belongsTo(DetailPesanan::class, 'id_menu');
     }
 }

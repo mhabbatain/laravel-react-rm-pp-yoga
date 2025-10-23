@@ -14,9 +14,7 @@ class Kategori extends Model
         'name',
     ];
 
-    /**
-     * Get the menus associated with the category.
-     */
+
     public function menus()
     {
         return $this->hasMany(Menu::class, 'id_kategori');

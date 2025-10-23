@@ -9,4 +9,20 @@ class Pesanan extends Model
 {
     /** @use HasFactory<\Database\Factories\PesananFactory> */
     use HasFactory;
+
+    protected $fillable = [
+        'meja',
+        'waktu',
+        'metode_pembayaran',
+    ];
+
+    public function karyawan()
+    {
+        return $this->belongsTo(Karyawan::class, 'id_karyawan');
+    }
+
+    public function details_pesanans()
+    {
+        return $this->hasMany(DetailPesanan::class, 'id_pesanan');
+    }
 }

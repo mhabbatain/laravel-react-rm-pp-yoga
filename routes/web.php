@@ -25,4 +25,3 @@ Route::get('/daftar-menu', fn() => inertia('daftar-menu'))->name('daftar-menu');
 
 
 require __DIR__ . '/settings.php';
-require __DIR__ . '/kategori.php';

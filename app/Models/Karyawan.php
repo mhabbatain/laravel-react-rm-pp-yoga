@@ -9,4 +9,16 @@ class Karyawan extends Model
 {
     /** @use HasFactory<\Database\Factories\KaryawanFactory> */
     use HasFactory;
+
+    protected $fillable = [
+        'nama',
+        'jabatan',
+        'no_telepon',
+        'alamat'
+    ];
+
+    public function pesanans()
+    {
+        return $this->hasMany(Pesanan::class, 'id_karyawan');
+    }
 }

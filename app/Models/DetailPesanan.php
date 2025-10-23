@@ -9,4 +9,19 @@ class DetailPesanan extends Model
 {
     /** @use HasFactory<\Database\Factories\DetailPesananFactory> */
     use HasFactory;
+
+    protected $fillable = [
+        'jumlah',
+        'subtotal',
+    ];
+
+    public function pesanan()
+    {
+        return $this->belongsTo(Pesanan::class, 'id_pesanan');
+    }
+
+    public function menu()
+    {
+        return $this->belongsTo(Menu::class, 'id_menu');
+    }
 }
