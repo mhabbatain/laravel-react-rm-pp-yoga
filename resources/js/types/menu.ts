@@ -4,6 +4,7 @@ export interface MenuItem {
     price: number;
     image: string;
     category: 'makanan' | 'minuman' | 'tambahan';
+    stok: number;
 }
 
 export interface OrderItem extends MenuItem {

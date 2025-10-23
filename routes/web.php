@@ -11,9 +11,9 @@ Route::get('/', function () {
 })->name('home');
 
 Route::middleware(['auth', 'verified'])->group(function () {
-    Route::get('dashboard', function () {
-        return Inertia::render('dashboard');
-    })->name('dashboard');
+    Route::get('beranda', function () {
+        return Inertia::render('beranda');
+    })->name('beranda');
 });
 
 Route::get('/pos', fn() => inertia('POS'))->name('pos');

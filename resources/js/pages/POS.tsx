@@ -77,20 +77,19 @@ export default function POS() {
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="POS" />
-            <MainContainer className="flex h-full flex-1 flex-col gap-4 overflow-x-auto rounded-xl p-4">
-                <header className="sticky top-0 z-10 border-b bg-card/80 shadow-sm backdrop-blur-sm">
-                    <div className="container mx-auto px-6 py-4">
-                        {/* <h1 className="bg-linear-to-r from-primary to-accent bg-clip-text text-3xl font-bold text-transparent"> */}
-                        <h1 className="bg-clip-text text-3xl font-bold">
+            <MainContainer>
+                <div className="flex items-center justify-between">
+                    <div>
+                        <h1 className="text-3xl font-bold text-foreground">
                             Sistem POS Rumah Makan PP Yoga
                         </h1>
-                        <p className="mt-1 text-muted-foreground">
+                        <p className="text-muted-foreground">
                             Muaro Bulian, Jambi
                         </p>
                     </div>
-                </header>
+                </div>
 
-                <div className="container mx-auto p-6">
+                <div className="container mx-auto">
                     <div className="grid h-[calc(100vh-140px)] grid-cols-1 gap-6 lg:grid-cols-3">
                         {/* Menu Section */}
                         <div className="flex flex-col lg:col-span-2">

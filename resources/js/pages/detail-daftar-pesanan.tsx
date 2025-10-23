@@ -1,7 +1,12 @@
 import MainContainer from '@/components/main-container';
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+    Dialog,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
+} from '@/components/ui/dialog';
 import {
     Table,
     TableBody,
@@ -10,58 +15,36 @@ import {
     TableHeader,
     TableRow,
 } from '@/components/ui/table';
+import { getOrderById } from '@/data/orders';
 import AppLayout from '@/layouts/app-layout';
 import { detailDaftarPesanan } from '@/routes';
 import { BreadcrumbItem } from '@/types';
 import { Head } from '@inertiajs/react';
 import { ArrowLeft, Edit, Printer } from 'lucide-react';
+import { useState } from 'react';
 
 export default function DetailDaftarPesanan({ id }: { id: string }) {
+    const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+    const orderFromData = getOrderById(id);
+
+    const orderData = orderFromData ?? {
+        id,
+        orderNumber: `ORD-2024-${id?.padStart(3, '0')}`,
+        customerName: '-',
+        orderTime: '-',
+        status: 'Tidak Diketahui',
+        items: [],
+        subtotal: 0,
+        tax: 0,
+        total: 0,
+    };
+
     const breadcrumbs: BreadcrumbItem[] = [
         {
-            title: 'Detail Daftar Pesanan',
+            title: `Detail Pesanan ${id}`,
             href: detailDaftarPesanan(id).url,
         },
     ];
-
-    const orderData = {
-        orderNumber: `ORD-2024-${id?.padStart(3, '0')}`,
-        customerName: 'Budi Santoso',
-        orderTime: '2024-01-15 14:30',
-        status: 'Diproses',
-        items: [
-            {
-                name: 'Nasi Goreng Spesial',
-                quantity: 2,
-                price: 35000,
-                subtotal: 70000,
-            },
-            { name: 'Es Teh Manis', quantity: 2, price: 5000, subtotal: 10000 },
-            {
-                name: 'Ayam Goreng Kremes',
-                quantity: 1,
-                price: 40000,
-                subtotal: 40000,
-            },
-            { name: 'Jus Alpukat', quantity: 1, price: 15000, subtotal: 15000 },
-        ],
-        subtotal: 135000,
-        tax: 13500,
-        total: 148500,
-    };
-
-    const getStatusColor = (status: string) => {
-        switch (status.toLowerCase()) {
-            case 'diproses':
-                return 'bg-warning text-warning-foreground';
-            case 'selesai':
-                return 'bg-success text-success-foreground';
-            case 'dibatalkan':
-                return 'bg-destructive text-destructive-foreground';
-            default:
-                return 'bg-secondary text-secondary-foreground';
-        }
-    };
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
@@ -99,7 +82,7 @@ export default function DetailDaftarPesanan({ id }: { id: string }) {
                         <CardTitle>Informasi Pesanan</CardTitle>
                     </CardHeader>
                     <CardContent>
-                        <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
+                        <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
                             <div>
                                 <p className="text-sm font-medium text-muted-foreground">
                                     Nomor Pesanan
@@ -110,29 +93,11 @@ export default function DetailDaftarPesanan({ id }: { id: string }) {
                             </div>
                             <div>
                                 <p className="text-sm font-medium text-muted-foreground">
-                                    Nama Pelanggan
-                                </p>
-                                <p className="mt-1 text-lg font-semibold text-foreground">
-                                    {orderData.customerName}
-                                </p>
-                            </div>
-                            <div>
-                                <p className="text-sm font-medium text-muted-foreground">
                                     Waktu Pemesanan
                                 </p>
                                 <p className="mt-1 text-lg font-semibold text-foreground">
                                     {orderData.orderTime}
                                 </p>
-                            </div>
-                            <div>
-                                <p className="text-sm font-medium text-muted-foreground">
-                                    Status
-                                </p>
-                                <Badge
-                                    className={`mt-1 ${getStatusColor(orderData.status)}`}
-                                >
-                                    {orderData.status}
-                                </Badge>
                             </div>
                         </div>
                     </CardContent>
@@ -239,13 +204,56 @@ export default function DetailDaftarPesanan({ id }: { id: string }) {
                         Cetak Nota
                     </Button>
                     <Button
-                        variant="default"
-                        className="flex-1 bg-accent hover:bg-accent/90"
+                        variant="destructive"
+                        className="flex-1"
+                        onClick={() => setIsDeleteDialogOpen(true)}
                     >
                         <Edit className="mr-2 h-4 w-4" />
-                        Ubah Status
+                        Delete
                     </Button>
                 </div>
+
+                {/* Modal Delete */}
+                <Dialog
+                    open={isDeleteDialogOpen}
+                    onOpenChange={setIsDeleteDialogOpen}
+                >
+                    <DialogContent>
+                        <DialogHeader>
+                            <DialogTitle>Konfirmasi Hapus</DialogTitle>
+                        </DialogHeader>
+                        <div className="space-y-4">
+                            <p>
+                                Apakah Anda yakin ingin menghapus pesanan{' '}
+                                <span className="font-semibold">
+                                    {orderData.orderNumber}
+                                </span>
+                                ?
+                            </p>
+                            <div className="flex gap-2 pt-4">
+                                <Button
+                                    variant="destructive"
+                                    className="flex-1"
+                                    onClick={() => {
+                                        // Handle delete logic here
+                                        setIsDeleteDialogOpen(false);
+                                        // Redirect back to daftar pesanan after delete
+                                        window.history.back();
+                                    }}
+                                >
+                                    Hapus
+                                </Button>
+                                <Button
+                                    variant="outline"
+                                    className="flex-1"
+                                    onClick={() => setIsDeleteDialogOpen(false)}
+                                >
+                                    Batal
+                                </Button>
+                            </div>
+                        </div>
+                    </DialogContent>
+                </Dialog>
             </MainContainer>
         </AppLayout>
     );

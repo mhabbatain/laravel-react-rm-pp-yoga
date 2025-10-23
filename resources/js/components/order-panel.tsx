@@ -4,6 +4,15 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
 import { OrderItem } from '@/types/menu';
 import { CreditCard, Minus, Plus, RotateCcw, Trash2 } from 'lucide-react';
+import {
+    Select,
+    SelectContent,
+    SelectGroup,
+    SelectItem,
+    SelectLabel,
+    SelectTrigger,
+    SelectValue,
+} from './ui/select';
 
 interface OrderPanelProps {
     orders: OrderItem[];
@@ -138,6 +147,51 @@ export default function OrderPanel({
                                 Rp {total.toLocaleString('id-ID')}
                             </span>
                         </div>
+                        <div className="flex flex-row gap-x-2">
+                            <Select>
+                                <SelectTrigger>
+                                    <SelectValue placeholder="Metode Pembayaran" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectGroup>
+                                        <SelectLabel>
+                                            Pilih metode pembayaran
+                                        </SelectLabel>
+                                        <SelectItem value="cash">
+                                            Cash
+                                        </SelectItem>
+                                        <SelectItem value="qris">
+                                            QRIS
+                                        </SelectItem>
+                                    </SelectGroup>
+                                </SelectContent>
+                            </Select>
+                            <Select>
+                                <SelectTrigger>
+                                    <SelectValue placeholder="Nomor Meja" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectGroup>
+                                        <SelectLabel>
+                                            Pilih nomor meja
+                                        </SelectLabel>
+                                        {[
+                                            '1',
+                                            '2',
+                                            '3',
+                                            '4',
+                                            '5',
+                                            '6',
+                                            '7',
+                                        ].map((item) => (
+                                            <SelectItem value={item}>
+                                                {item}
+                                            </SelectItem>
+                                        ))}
+                                    </SelectGroup>
+                                </SelectContent>
+                            </Select>
+                        </div>
 
                         <div className="grid grid-cols-2 gap-3">
                             <Button
@@ -150,7 +204,6 @@ export default function OrderPanel({
                             </Button>
 
                             <Button
-                                // className="w-full bg-linear-to-r from-primary to-accent transition-opacity hover:opacity-90"
                                 className="w-full transition-opacity hover:opacity-90"
                                 onClick={onPay}
                             >

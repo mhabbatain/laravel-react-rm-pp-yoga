@@ -1,10 +1,11 @@
 import MainContainer from '@/components/main-container';
+import { menuItems } from '@/data/menuData';
 import AppLayout from '@/layouts/app-layout';
 import { daftarMenu } from '@/routes';
 import { BreadcrumbItem } from '@/types';
+import { MenuItem } from '@/types/menu';
 import { Head } from '@inertiajs/react';
 
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
@@ -38,56 +39,51 @@ const breadcrumbs: BreadcrumbItem[] = [
 export default function DaftarMenu() {
     const [searchQuery, setSearchQuery] = useState('');
     const [isDialogOpen, setIsDialogOpen] = useState(false);
+    const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+    const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+    const [menus] = useState<MenuItem[]>(menuItems);
+    const [selectedMenu, setSelectedMenu] = useState<MenuItem | null>(null);
+    const [previewImage, setPreviewImage] = useState<string | null>(null);
+    const [editPreviewImage, setEditPreviewImage] = useState<string | null>(
+        null,
+    );
 
-    const menuItems = {
-        makanan: [
-            {
-                id: 1,
-                name: 'Nasi Goreng Spesial',
-                price: 35000,
-                status: 'Tersedia',
-            },
-            {
-                id: 2,
-                name: 'Ayam Goreng Kremes',
-                price: 40000,
-                status: 'Tersedia',
-            },
-            { id: 3, name: 'Mie Goreng Jawa', price: 30000, status: 'Habis' },
-            { id: 4, name: 'Soto Ayam', price: 25000, status: 'Tersedia' },
-        ],
-        minuman: [
-            { id: 5, name: 'Es Teh Manis', price: 5000, status: 'Tersedia' },
-            { id: 6, name: 'Jus Alpukat', price: 15000, status: 'Tersedia' },
-            { id: 7, name: 'Es Jeruk', price: 8000, status: 'Tersedia' },
-            { id: 8, name: 'Kopi Susu', price: 12000, status: 'Habis' },
-        ],
-        tambahan: [
-            { id: 9, name: 'Kerupuk', price: 3000, status: 'Tersedia' },
-            { id: 10, name: 'Sambal Extra', price: 2000, status: 'Tersedia' },
-            {
-                id: 11,
-                name: 'Telur Mata Sapi',
-                price: 5000,
-                status: 'Tersedia',
-            },
-        ],
+    const handleImageChange = (
+        e: React.ChangeEvent<HTMLInputElement>,
+        isEdit: boolean = false,
+    ) => {
+        const file = e.target.files?.[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                if (isEdit) {
+                    setEditPreviewImage(reader.result as string);
+                } else {
+                    setPreviewImage(reader.result as string);
+                }
+            };
+            reader.readAsDataURL(file);
+        }
     };
 
-    const getStatusColor = (status: string) => {
-        return status === 'Tersedia'
-            ? 'bg-success text-success-foreground'
-            : 'bg-destructive text-destructive-foreground';
-    };
-
-    const filterItems = (items: typeof menuItems.makanan) => {
-        return items.filter((item) =>
-            item.name.toLowerCase().includes(searchQuery.toLowerCase()),
+    const filterItems = (category: MenuItem['category']) => {
+        return menus.filter(
+            (item) =>
+                item.category === category &&
+                item.name.toLowerCase().includes(searchQuery.toLowerCase()),
         );
     };
-    const MenuCard = ({ item }: { item: (typeof menuItems.makanan)[0] }) => (
+
+    const MenuCard = ({ item }: { item: MenuItem }) => (
         <Card className="transition-shadow hover:shadow-lg">
-            <CardContent className="p-6">
+            <div className="aspect-4/3 overflow-hidden bg-muted">
+                <img
+                    src={item.image}
+                    alt={item.name}
+                    className="h-full w-full object-cover transition-transform duration-300 hover:scale-105"
+                />
+            </div>
+            <CardContent>
                 <div className="space-y-4">
                     <div className="flex items-start justify-between">
                         <div className="space-y-1">
@@ -98,16 +94,29 @@ export default function DaftarMenu() {
                                 Rp {item.price.toLocaleString('id-ID')}
                             </p>
                         </div>
-                        <Badge className={getStatusColor(item.status)}>
-                            {item.status}
-                        </Badge>
                     </div>
                     <div className="flex gap-2">
-                        <Button variant="outline" size="sm" className="flex-1">
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            className="flex-1"
+                            onClick={() => {
+                                setSelectedMenu(item);
+                                setIsEditDialogOpen(true);
+                            }}
+                        >
                             <Edit className="mr-2 h-3 w-3" />
                             Edit
                         </Button>
-                        <Button variant="outline" size="sm" className="flex-1">
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            className="flex-1"
+                            onClick={() => {
+                                setSelectedMenu(item);
+                                setIsDeleteDialogOpen(true);
+                            }}
+                        >
                             <Trash2 className="mr-2 h-3 w-3 text-destructive" />
                             Hapus
                         </Button>
@@ -148,7 +157,12 @@ export default function DaftarMenu() {
                                 </div>
                                 <Dialog
                                     open={isDialogOpen}
-                                    onOpenChange={setIsDialogOpen}
+                                    onOpenChange={(open) => {
+                                        setIsDialogOpen(open);
+                                        if (!open) {
+                                            setPreviewImage(null);
+                                        }
+                                    }}
                                 >
                                     <DialogTrigger asChild>
                                         <Button>
@@ -192,6 +206,16 @@ export default function DaftarMenu() {
                                                 />
                                             </div>
                                             <div className="space-y-2">
+                                                <Label htmlFor="stok">
+                                                    Stok
+                                                </Label>
+                                                <Input
+                                                    id="stok"
+                                                    type="number"
+                                                    placeholder="0"
+                                                />
+                                            </div>
+                                            <div className="space-y-2">
                                                 <Label htmlFor="category">
                                                     Kategori
                                                 </Label>
@@ -213,38 +237,43 @@ export default function DaftarMenu() {
                                                 </Select>
                                             </div>
                                             <div className="space-y-2">
-                                                <Label htmlFor="status">
-                                                    Status
+                                                <Label htmlFor="image">
+                                                    Gambar Menu
                                                 </Label>
-                                                <Select>
-                                                    <SelectTrigger>
-                                                        <SelectValue placeholder="Pilih status" />
-                                                    </SelectTrigger>
-                                                    <SelectContent>
-                                                        <SelectItem value="tersedia">
-                                                            Tersedia
-                                                        </SelectItem>
-                                                        <SelectItem value="habis">
-                                                            Habis
-                                                        </SelectItem>
-                                                    </SelectContent>
-                                                </Select>
+                                                <Input
+                                                    id="image"
+                                                    type="file"
+                                                    accept="image/*"
+                                                    onChange={handleImageChange}
+                                                    className="cursor-pointer"
+                                                />
+                                                {previewImage && (
+                                                    <div className="mt-2 overflow-hidden rounded-md border">
+                                                        <img
+                                                            src={previewImage}
+                                                            alt="Preview"
+                                                            className="aspect-video h-auto w-full object-cover"
+                                                        />
+                                                    </div>
+                                                )}
                                             </div>
                                             <div className="flex gap-2 pt-4">
                                                 <Button
                                                     className="flex-1"
-                                                    onClick={() =>
-                                                        setIsDialogOpen(false)
-                                                    }
+                                                    onClick={() => {
+                                                        setIsDialogOpen(false);
+                                                        setPreviewImage(null);
+                                                    }}
                                                 >
                                                     Simpan
                                                 </Button>
                                                 <Button
                                                     variant="outline"
                                                     className="flex-1"
-                                                    onClick={() =>
-                                                        setIsDialogOpen(false)
-                                                    }
+                                                    onClick={() => {
+                                                        setIsDialogOpen(false);
+                                                        setPreviewImage(null);
+                                                    }}
                                                 >
                                                     Batal
                                                 </Button>
@@ -270,43 +299,221 @@ export default function DaftarMenu() {
                             </TabsList>
                             <TabsContent value="makanan" className="mt-6">
                                 <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                                    {filterItems(menuItems.makanan).map(
-                                        (item) => (
-                                            <MenuCard
-                                                key={item.id}
-                                                item={item}
-                                            />
-                                        ),
-                                    )}
+                                    {filterItems('makanan').map((item) => (
+                                        <MenuCard key={item.id} item={item} />
+                                    ))}
                                 </div>
                             </TabsContent>
                             <TabsContent value="minuman" className="mt-6">
                                 <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                                    {filterItems(menuItems.minuman).map(
-                                        (item) => (
-                                            <MenuCard
-                                                key={item.id}
-                                                item={item}
-                                            />
-                                        ),
-                                    )}
+                                    {filterItems('minuman').map((item) => (
+                                        <MenuCard key={item.id} item={item} />
+                                    ))}
                                 </div>
                             </TabsContent>
                             <TabsContent value="tambahan" className="mt-6">
                                 <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                                    {filterItems(menuItems.tambahan).map(
-                                        (item) => (
-                                            <MenuCard
-                                                key={item.id}
-                                                item={item}
-                                            />
-                                        ),
-                                    )}
+                                    {filterItems('tambahan').map((item) => (
+                                        <MenuCard key={item.id} item={item} />
+                                    ))}
                                 </div>
                             </TabsContent>
                         </Tabs>
                     </CardContent>
                 </Card>
+
+                {/* Modal Edit */}
+                <Dialog
+                    open={isEditDialogOpen}
+                    onOpenChange={(open) => {
+                        setIsEditDialogOpen(open);
+                        if (!open) {
+                            setEditPreviewImage(null);
+                        }
+                    }}
+                >
+                    <DialogContent>
+                        <DialogHeader>
+                            <DialogTitle>Edit Menu</DialogTitle>
+                        </DialogHeader>
+                        <div className="space-y-4">
+                            <div className="space-y-2">
+                                <Label htmlFor="edit-name">Nama Menu</Label>
+                                <Input
+                                    id="edit-name"
+                                    placeholder="Masukkan nama menu"
+                                    value={selectedMenu?.name}
+                                    onChange={(e) =>
+                                        setSelectedMenu(
+                                            selectedMenu
+                                                ? {
+                                                      ...selectedMenu,
+                                                      name: e.target.value,
+                                                  }
+                                                : null,
+                                        )
+                                    }
+                                />
+                            </div>
+                            <div className="space-y-2">
+                                <Label htmlFor="edit-price">Harga</Label>
+                                <Input
+                                    id="edit-price"
+                                    type="number"
+                                    placeholder="25000"
+                                    value={selectedMenu?.price}
+                                    onChange={(e) =>
+                                        setSelectedMenu(
+                                            selectedMenu
+                                                ? {
+                                                      ...selectedMenu,
+                                                      price: Number(
+                                                          e.target.value,
+                                                      ),
+                                                  }
+                                                : null,
+                                        )
+                                    }
+                                />
+                            </div>
+                            <div className="space-y-2">
+                                <Label htmlFor="edit-stok">Stok</Label>
+                                <Input
+                                    id="edit-stok"
+                                    type="number"
+                                    placeholder="0"
+                                    value={selectedMenu?.stok}
+                                    onChange={(e) =>
+                                        setSelectedMenu(
+                                            selectedMenu
+                                                ? {
+                                                      ...selectedMenu,
+                                                      stok: Number(
+                                                          e.target.value,
+                                                      ),
+                                                  }
+                                                : null,
+                                        )
+                                    }
+                                />
+                            </div>
+                            <div className="space-y-2">
+                                <Label htmlFor="edit-category">Kategori</Label>
+                                <Select
+                                    value={selectedMenu?.category}
+                                    onValueChange={(value) =>
+                                        setSelectedMenu(
+                                            selectedMenu
+                                                ? {
+                                                      ...selectedMenu,
+                                                      category:
+                                                          value as MenuItem['category'],
+                                                  }
+                                                : null,
+                                        )
+                                    }
+                                >
+                                    <SelectTrigger>
+                                        <SelectValue placeholder="Pilih kategori" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="makanan">
+                                            Makanan
+                                        </SelectItem>
+                                        <SelectItem value="minuman">
+                                            Minuman
+                                        </SelectItem>
+                                        <SelectItem value="tambahan">
+                                            Tambahan
+                                        </SelectItem>
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                            <div className="space-y-2">
+                                <Label htmlFor="edit-image">Gambar Menu</Label>
+                                <div className="mb-4 overflow-hidden rounded-md border">
+                                    <img
+                                        src={
+                                            editPreviewImage ||
+                                            selectedMenu?.image
+                                        }
+                                        alt={selectedMenu?.name}
+                                        className="aspect-video h-auto w-full object-cover"
+                                    />
+                                </div>
+                                <Input
+                                    id="edit-image"
+                                    type="file"
+                                    accept="image/*"
+                                    onChange={(e) => handleImageChange(e, true)}
+                                    className="cursor-pointer"
+                                />
+                            </div>
+                            <div className="flex gap-2 pt-4">
+                                <Button
+                                    className="flex-1"
+                                    onClick={() => {
+                                        // Handle update logic here
+                                        setIsEditDialogOpen(false);
+                                        setEditPreviewImage(null);
+                                    }}
+                                >
+                                    Simpan
+                                </Button>
+                                <Button
+                                    variant="outline"
+                                    className="flex-1"
+                                    onClick={() => {
+                                        setIsEditDialogOpen(false);
+                                        setEditPreviewImage(null);
+                                    }}
+                                >
+                                    Batal
+                                </Button>
+                            </div>
+                        </div>
+                    </DialogContent>
+                </Dialog>
+
+                {/* Modal Delete */}
+                <Dialog
+                    open={isDeleteDialogOpen}
+                    onOpenChange={setIsDeleteDialogOpen}
+                >
+                    <DialogContent>
+                        <DialogHeader>
+                            <DialogTitle>Konfirmasi Hapus</DialogTitle>
+                        </DialogHeader>
+                        <div className="space-y-4">
+                            <p>
+                                Apakah Anda yakin ingin menghapus menu{' '}
+                                <span className="font-semibold">
+                                    {selectedMenu?.name}
+                                </span>
+                                ?
+                            </p>
+                            <div className="flex gap-2 pt-4">
+                                <Button
+                                    variant="destructive"
+                                    className="flex-1"
+                                    onClick={() => {
+                                        // Handle delete logic here
+                                        setIsDeleteDialogOpen(false);
+                                    }}
+                                >
+                                    Hapus
+                                </Button>
+                                <Button
+                                    variant="outline"
+                                    className="flex-1"
+                                    onClick={() => setIsDeleteDialogOpen(false)}
+                                >
+                                    Batal
+                                </Button>
+                            </div>
+                        </div>
+                    </DialogContent>
+                </Dialog>
             </MainContainer>
         </AppLayout>
     );
