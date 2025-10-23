@@ -12,7 +12,9 @@ class KategoriController extends Controller
      */
     public function index()
     {
-        //
+        // Ambil semua kategori
+        $kategoris = Kategori::all();
+        return response()->json($kategoris);
     }
 
     /**
@@ -28,7 +30,11 @@ class KategoriController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+        ]);
+        $kategori = Kategori::create($validated);
+        return response()->json($kategori, 201);
     }
 
     /**
@@ -36,7 +42,7 @@ class KategoriController extends Controller
      */
     public function show(Kategori $kategori)
     {
-        //
+        return response()->json($kategori);
     }
 
     /**
@@ -52,7 +58,11 @@ class KategoriController extends Controller
      */
     public function update(Request $request, Kategori $kategori)
     {
-        //
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+        ]);
+        $kategori->update($validated);
+        return response()->json($kategori);
     }
 
     /**
@@ -60,6 +70,7 @@ class KategoriController extends Controller
      */
     public function destroy(Kategori $kategori)
     {
-        //
+        $kategori->delete();
+        return response()->json(['message' => 'Kategori deleted']);
     }
 }

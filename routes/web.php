@@ -23,4 +23,6 @@ Route::get('/daftar-pesanan/{id}', fn($id) => inertia('detail-daftar-pesanan', [
 Route::get('/karyawan', fn() => inertia('karyawan'))->name('karyawan');
 Route::get('/daftar-menu', fn() => inertia('daftar-menu'))->name('daftar-menu');
 
+
 require __DIR__ . '/settings.php';
+require __DIR__ . '/kategori.php';

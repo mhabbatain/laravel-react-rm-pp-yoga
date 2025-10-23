@@ -13,6 +13,8 @@ return new class extends Migration
     {
         Schema::create('detail_pesanans', function (Blueprint $table) {
             $table->id();
+            $table->integer("jumlah");
+            $table->decimal("subtotal");
             $table->timestamps();
         });
     }

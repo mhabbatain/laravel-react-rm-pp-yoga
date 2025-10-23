@@ -13,6 +13,10 @@ return new class extends Migration
     {
         Schema::create('pesanans', function (Blueprint $table) {
             $table->id();
+            $table->enum("meja", ['1', '2', '3', '4', '5', '6', '7']);
+            $table->dateTime('waktu', precision: 0);
+            $table->double("total");
+            $table->enum("metode_pembayaran", ["tunai", "qris"]);
             $table->timestamps();
         });
     }
