@@ -227,10 +227,18 @@ export default function Karyawan() {
                                         <TableCell>
                                             <Badge
                                                 className={getStatusColor(
-                                                    karyawan.status,
+                                                    karyawan.status
+                                                        .charAt(0)
+                                                        .toUpperCase() +
+                                                        karyawan.status.slice(
+                                                            1,
+                                                        ),
                                                 )}
                                             >
-                                                {karyawan.status}
+                                                {karyawan.status
+                                                    .charAt(0)
+                                                    .toUpperCase() +
+                                                    karyawan.status.slice(1)}
                                             </Badge>
                                         </TableCell>
                                         <TableCell className="text-right">

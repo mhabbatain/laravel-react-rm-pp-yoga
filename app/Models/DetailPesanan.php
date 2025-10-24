@@ -11,6 +11,8 @@ class DetailPesanan extends Model
     use HasFactory;
 
     protected $fillable = [
+        'id_pesanan',
+        'id_menu',
         'jumlah',
         'subtotal',
     ];

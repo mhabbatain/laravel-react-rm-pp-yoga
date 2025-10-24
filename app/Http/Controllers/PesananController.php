@@ -42,7 +42,7 @@ class PesananController extends Controller
         // Load relasi detail_pesanans dan menu
         $daftar_pesanan->load('detail_pesanans.menu');
 
-        return Inertia::render('detail-daftar-pesanan', [
+        return Inertia::render('daftar-pesanan-detail', [
             'pesanan' => $daftar_pesanan,
         ]);
     }

@@ -27,9 +27,11 @@ import { Head, usePage } from '@inertiajs/react';
 import { ArrowLeft, Edit, Printer } from 'lucide-react';
 import { useState } from 'react';
 
-export default function DetailDaftarPesanan({ id }: { id: number }) {
+export default function DaftarPesananDetail() {
     const { pesanan: pesananData } = usePage<SharedData>().props;
     const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+
+    const id = pesananData?.id;
 
     // Fallback jika data not found
     const pesanan = pesananData ?? {
@@ -38,9 +40,8 @@ export default function DetailDaftarPesanan({ id }: { id: number }) {
         meja: EnumNomorMeja.Satu, // default fallback
         waktu: '-',
         total: 0,
-        subtotal: 0,
         metode_pembayaran: EnumMetodePembayaran.Tunai,
-        detail_pesanan: [], // ini menggantikan "items"
+        detail_pesanans: [],
         created_at: '',
         updated_at: '',
     };
@@ -52,10 +53,29 @@ export default function DetailDaftarPesanan({ id }: { id: number }) {
         },
         {
             title: `Detail Pesanan ${id}`,
-            href: daftarPesanan.show(id).url,
+            href: id ? daftarPesanan.show(id).url : '#',
         },
     ];
 
+    const formattedDateTime = (() => {
+        if (!pesanan.created_at) return '-';
+        const date = new Date(pesanan.created_at);
+        if (isNaN(date.getTime())) return '-';
+
+        const tanggal = date.toLocaleDateString('id-ID', {
+            day: '2-digit',
+            month: 'long',
+            year: 'numeric',
+        });
+
+        const waktu = date.toLocaleTimeString('id-ID', {
+            hour: '2-digit',
+            minute: '2-digit',
+            second: '2-digit',
+        });
+
+        return `${tanggal} - ${waktu}`;
+    })();
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="DetailDaftarPesanan" />
@@ -106,7 +126,7 @@ export default function DetailDaftarPesanan({ id }: { id: number }) {
                                     Waktu Pemesanan
                                 </p>
                                 <p className="mt-1 text-lg font-semibold text-foreground">
-                                    {pesanan.created_at}
+                                    {formattedDateTime}
                                 </p>
                             </div>
                         </div>
@@ -135,7 +155,7 @@ export default function DetailDaftarPesanan({ id }: { id: number }) {
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
-                                {pesanan.detail_pesanan?.map((item, index) => (
+                                {pesanan.detail_pesanans?.map((item, index) => (
                                     <TableRow key={index}>
                                         <TableCell className="font-medium">
                                             {item.menu?.nama_menu ?? '-'}
@@ -145,9 +165,11 @@ export default function DetailDaftarPesanan({ id }: { id: number }) {
                                         </TableCell>
                                         <TableCell className="text-right">
                                             Rp{' '}
-                                            {item.menu?.harga.toLocaleString(
-                                                'id-ID',
-                                            ) ?? 0}
+                                            {item.menu
+                                                ? item.menu.harga.toLocaleString(
+                                                      'id-ID',
+                                                  )
+                                                : '0'}
                                         </TableCell>
                                         <TableCell className="text-right font-semibold">
                                             Rp{' '}
@@ -159,7 +181,7 @@ export default function DetailDaftarPesanan({ id }: { id: number }) {
                                 ))}
 
                                 {/* Jika tidak ada item */}
-                                {pesanan.detail_pesanan?.length === 0 && (
+                                {pesanan.detail_pesanans?.length === 0 && (
                                     <TableRow>
                                         <TableCell
                                             colSpan={4}
@@ -181,7 +203,7 @@ export default function DetailDaftarPesanan({ id }: { id: number }) {
                     </CardHeader>
                     <CardContent>
                         <div className="space-y-3">
-                            <div className="flex justify-between text-base">
+                            {/* <div className="flex justify-between text-base">
                                 <span className="text-muted-foreground">
                                     Subtotal
                                 </span>
@@ -189,7 +211,7 @@ export default function DetailDaftarPesanan({ id }: { id: number }) {
                                     Rp{' '}
                                     {pesanan.subtotal.toLocaleString('id-ID')}
                                 </span>
-                            </div>
+                            </div> */}
                             {/* <div className="flex justify-between text-base">
                                 <span className="text-muted-foreground">
                                     Pajak (10%)

@@ -11,8 +11,11 @@ class Pesanan extends Model
     use HasFactory;
 
     protected $fillable = [
+        'id_karyawan',
+        'nomor_pesanan',
         'meja',
         'waktu',
+        'total',
         'metode_pembayaran',
     ];
 

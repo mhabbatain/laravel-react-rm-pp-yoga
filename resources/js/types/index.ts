@@ -80,12 +80,11 @@ export interface Pesanan {
     nomor_pesanan: string;
     waktu: string;
     total: number;
-    subtotal: number;
     metode_pembayaran: EnumMetodePembayaran;
     karyawan?: Karyawan;
     created_at: string;
     updated_at: string;
-    detail_pesanan?: DetailPesanan[];
+    detail_pesanans?: DetailPesanan[];
 }
 
 export interface DetailPesanan {
