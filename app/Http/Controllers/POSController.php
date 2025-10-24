@@ -7,18 +7,20 @@ use App\Models\Menu;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
-class MenuController extends Controller
+class POSController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
+
     public function index()
     {
-        return Inertia::render('daftar-menu', [
+        return Inertia::render('POS', [
             'kategoris' => Kategori::all(),
             'menuItems' => Menu::with('kategori')->get(),
         ]);
     }
+
 
     /**
      * Show the form for creating a new resource.
@@ -39,7 +41,7 @@ class MenuController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Menu $menu)
+    public function show(string $id)
     {
         //
     }
@@ -47,7 +49,7 @@ class MenuController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(Menu $menu)
+    public function edit(string $id)
     {
         //
     }
@@ -55,7 +57,7 @@ class MenuController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Menu $menu)
+    public function update(Request $request, string $id)
     {
         //
     }
@@ -63,7 +65,7 @@ class MenuController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Menu $menu)
+    public function destroy(string $id)
     {
         //
     }

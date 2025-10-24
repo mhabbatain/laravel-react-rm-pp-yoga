@@ -27,78 +27,40 @@ import {
     TableRow,
 } from '@/components/ui/table';
 import AppLayout from '@/layouts/app-layout';
-import { karyawan } from '@/routes';
-import { BreadcrumbItem } from '@/types';
-import { Head } from '@inertiajs/react';
+import karyawan from '@/routes/karyawan';
+import {
+    BreadcrumbItem,
+    EnumJabatan,
+    EnumStatusKaryawan,
+    Karyawan as Karyawans,
+    SharedData,
+} from '@/types';
+import { Head, usePage } from '@inertiajs/react';
 import { Edit, Plus, Search, Trash2 } from 'lucide-react';
 import { useState } from 'react';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
         title: 'Karyawan',
-        href: karyawan().url,
+        href: karyawan.index().url,
     },
 ];
 
-type Employee = {
-    id: number;
-    name: string;
-    position: string;
-    phone: string;
-    status: string;
-};
-
 export default function Karyawan() {
+    const { karyawans } = usePage<SharedData>().props;
+
     const [searchQuery, setSearchQuery] = useState('');
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
     const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
-    const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(
+    const [selectedKaryawan, setSelectedKaryawan] = useState<Karyawans | null>(
         null,
     );
 
-    const employees = [
-        {
-            id: 1,
-            name: 'Ahmad Fauzi',
-            position: 'Kasir',
-            phone: '081234567890',
-            status: 'Aktif',
-        },
-        {
-            id: 2,
-            name: 'Siti Nurhaliza',
-            position: 'Pelayan',
-            phone: '081234567891',
-            status: 'Aktif',
-        },
-        {
-            id: 3,
-            name: 'Budi Hartono',
-            position: 'Koki',
-            phone: '081234567892',
-            status: 'Aktif',
-        },
-        {
-            id: 4,
-            name: 'Rina Wijaya',
-            position: 'Manajer',
-            phone: '081234567893',
-            status: 'Aktif',
-        },
-        {
-            id: 5,
-            name: 'Dedi Susanto',
-            position: 'Pelayan',
-            phone: '081234567894',
-            status: 'Nonaktif',
-        },
-    ];
-
-    const filteredEmployees = employees.filter(
-        (emp) =>
-            emp.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            emp.position.toLowerCase().includes(searchQuery.toLowerCase()),
+    const filteredKaryawans = karyawans.filter(
+        (karyawan) =>
+            karyawan.nama.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            karyawan.jabatan.toLowerCase().includes(searchQuery.toLowerCase()),
     );
 
     const getStatusColor = (status: string) => {
@@ -251,22 +213,24 @@ export default function Karyawan() {
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
-                                {filteredEmployees.map((employee) => (
-                                    <TableRow key={employee.id}>
+                                {filteredKaryawans.map((karyawan) => (
+                                    <TableRow key={karyawan.id}>
                                         <TableCell className="font-medium">
-                                            {employee.name}
+                                            {karyawan.nama}
                                         </TableCell>
                                         <TableCell>
-                                            {employee.position}
+                                            {karyawan.jabatan}
                                         </TableCell>
-                                        <TableCell>{employee.phone}</TableCell>
+                                        <TableCell>
+                                            {karyawan.no_telepon}
+                                        </TableCell>
                                         <TableCell>
                                             <Badge
                                                 className={getStatusColor(
-                                                    employee.status,
+                                                    karyawan.status,
                                                 )}
                                             >
-                                                {employee.status}
+                                                {karyawan.status}
                                             </Badge>
                                         </TableCell>
                                         <TableCell className="text-right">
@@ -275,8 +239,8 @@ export default function Karyawan() {
                                                     variant="outline"
                                                     size="icon"
                                                     onClick={() => {
-                                                        setSelectedEmployee(
-                                                            employee,
+                                                        setSelectedKaryawan(
+                                                            karyawan,
                                                         );
                                                         setIsEditDialogOpen(
                                                             true,
@@ -289,8 +253,8 @@ export default function Karyawan() {
                                                     variant="outline"
                                                     size="icon"
                                                     onClick={() => {
-                                                        setSelectedEmployee(
-                                                            employee,
+                                                        setSelectedKaryawan(
+                                                            karyawan,
                                                         );
                                                         setIsDeleteDialogOpen(
                                                             true,
@@ -323,13 +287,13 @@ export default function Karyawan() {
                                 <Input
                                     id="edit-name"
                                     placeholder="Masukkan nama lengkap"
-                                    value={selectedEmployee?.name}
+                                    value={selectedKaryawan?.nama}
                                     onChange={(e) =>
-                                        setSelectedEmployee(
-                                            selectedEmployee
+                                        setSelectedKaryawan(
+                                            selectedKaryawan
                                                 ? {
-                                                      ...selectedEmployee,
-                                                      name: e.target.value,
+                                                      ...selectedKaryawan,
+                                                      nama: e.target.value,
                                                   }
                                                 : null,
                                         )
@@ -339,17 +303,18 @@ export default function Karyawan() {
                             <div className="space-y-2">
                                 <Label htmlFor="edit-position">Jabatan</Label>
                                 <Select
-                                    value={selectedEmployee?.position.toLowerCase()}
+                                    value={selectedKaryawan?.jabatan.toLowerCase()}
                                     onValueChange={(value) =>
-                                        setSelectedEmployee(
-                                            selectedEmployee
+                                        setSelectedKaryawan(
+                                            selectedKaryawan
                                                 ? {
-                                                      ...selectedEmployee,
-                                                      position:
-                                                          value
-                                                              .charAt(0)
-                                                              .toUpperCase() +
-                                                          value.slice(1),
+                                                      ...selectedKaryawan,
+                                                      jabatan: (value
+                                                          .charAt(0)
+                                                          .toUpperCase() +
+                                                          value.slice(
+                                                              1,
+                                                          )) as EnumJabatan,
                                                   }
                                                 : null,
                                         )
@@ -381,13 +346,14 @@ export default function Karyawan() {
                                 <Input
                                     id="edit-phone"
                                     placeholder="081234567890"
-                                    value={selectedEmployee?.phone}
+                                    value={selectedKaryawan?.no_telepon}
                                     onChange={(e) =>
-                                        setSelectedEmployee(
-                                            selectedEmployee
+                                        setSelectedKaryawan(
+                                            selectedKaryawan
                                                 ? {
-                                                      ...selectedEmployee,
-                                                      phone: e.target.value,
+                                                      ...selectedKaryawan,
+                                                      no_telepon:
+                                                          e.target.value,
                                                   }
                                                 : null,
                                         )
@@ -397,17 +363,18 @@ export default function Karyawan() {
                             <div className="space-y-2">
                                 <Label htmlFor="edit-status">Status</Label>
                                 <Select
-                                    value={selectedEmployee?.status.toLowerCase()}
+                                    value={selectedKaryawan?.status.toLowerCase()}
                                     onValueChange={(value) =>
-                                        setSelectedEmployee(
-                                            selectedEmployee
+                                        setSelectedKaryawan(
+                                            selectedKaryawan
                                                 ? {
-                                                      ...selectedEmployee,
-                                                      status:
-                                                          value
-                                                              .charAt(0)
-                                                              .toUpperCase() +
-                                                          value.slice(1),
+                                                      ...selectedKaryawan,
+                                                      status: (value
+                                                          .charAt(0)
+                                                          .toUpperCase() +
+                                                          value.slice(
+                                                              1,
+                                                          )) as EnumStatusKaryawan,
                                                   }
                                                 : null,
                                         )
@@ -461,7 +428,7 @@ export default function Karyawan() {
                             <p>
                                 Apakah Anda yakin ingin menghapus data karyawan{' '}
                                 <span className="font-semibold">
-                                    {selectedEmployee?.name}
+                                    {selectedKaryawan?.nama}
                                 </span>
                                 ?
                             </p>

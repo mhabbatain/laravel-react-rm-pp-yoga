@@ -15,34 +15,44 @@ import {
     TableHeader,
     TableRow,
 } from '@/components/ui/table';
-import { getOrderById } from '@/data/orders';
 import AppLayout from '@/layouts/app-layout';
-import { detailDaftarPesanan } from '@/routes';
-import { BreadcrumbItem } from '@/types';
-import { Head } from '@inertiajs/react';
+import daftarPesanan from '@/routes/daftar-pesanan';
+import {
+    BreadcrumbItem,
+    EnumMetodePembayaran,
+    EnumNomorMeja,
+    SharedData,
+} from '@/types';
+import { Head, usePage } from '@inertiajs/react';
 import { ArrowLeft, Edit, Printer } from 'lucide-react';
 import { useState } from 'react';
 
-export default function DetailDaftarPesanan({ id }: { id: string }) {
+export default function DetailDaftarPesanan({ id }: { id: number }) {
+    const { pesanan: pesananData } = usePage<SharedData>().props;
     const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
-    const orderFromData = getOrderById(id);
 
-    const orderData = orderFromData ?? {
-        id,
-        orderNumber: `ORD-2024-${id?.padStart(3, '0')}`,
-        customerName: '-',
-        orderTime: '-',
-        status: 'Tidak Diketahui',
-        items: [],
-        subtotal: 0,
-        tax: 0,
+    // Fallback jika data not found
+    const pesanan = pesananData ?? {
+        id: Number(id),
+        nomor_pesanan: `ORD-2024-${id?.toString().padStart(3, '0')}`,
+        meja: EnumNomorMeja.Satu, // default fallback
+        waktu: '-',
         total: 0,
+        subtotal: 0,
+        metode_pembayaran: EnumMetodePembayaran.Tunai,
+        detail_pesanan: [], // ini menggantikan "items"
+        created_at: '',
+        updated_at: '',
     };
 
     const breadcrumbs: BreadcrumbItem[] = [
         {
+            title: 'Daftar Pesanan',
+            href: daftarPesanan.index().url,
+        },
+        {
             title: `Detail Pesanan ${id}`,
-            href: detailDaftarPesanan(id).url,
+            href: daftarPesanan.show(id).url,
         },
     ];
 
@@ -88,7 +98,7 @@ export default function DetailDaftarPesanan({ id }: { id: string }) {
                                     Nomor Pesanan
                                 </p>
                                 <p className="mt-1 text-lg font-semibold text-foreground">
-                                    {orderData.orderNumber}
+                                    {pesanan.nomor_pesanan}
                                 </p>
                             </div>
                             <div>
@@ -96,7 +106,7 @@ export default function DetailDaftarPesanan({ id }: { id: string }) {
                                     Waktu Pemesanan
                                 </p>
                                 <p className="mt-1 text-lg font-semibold text-foreground">
-                                    {orderData.orderTime}
+                                    {pesanan.created_at}
                                 </p>
                             </div>
                         </div>
@@ -125,17 +135,19 @@ export default function DetailDaftarPesanan({ id }: { id: string }) {
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
-                                {orderData.items.map((item, index) => (
+                                {pesanan.detail_pesanan?.map((item, index) => (
                                     <TableRow key={index}>
                                         <TableCell className="font-medium">
-                                            {item.name}
+                                            {item.menu?.nama_menu ?? '-'}
                                         </TableCell>
                                         <TableCell className="text-center">
-                                            {item.quantity}
+                                            {item.jumlah}
                                         </TableCell>
                                         <TableCell className="text-right">
                                             Rp{' '}
-                                            {item.price.toLocaleString('id-ID')}
+                                            {item.menu?.harga.toLocaleString(
+                                                'id-ID',
+                                            ) ?? 0}
                                         </TableCell>
                                         <TableCell className="text-right font-semibold">
                                             Rp{' '}
@@ -145,6 +157,18 @@ export default function DetailDaftarPesanan({ id }: { id: string }) {
                                         </TableCell>
                                     </TableRow>
                                 ))}
+
+                                {/* Jika tidak ada item */}
+                                {pesanan.detail_pesanan?.length === 0 && (
+                                    <TableRow>
+                                        <TableCell
+                                            colSpan={4}
+                                            className="text-center text-muted-foreground"
+                                        >
+                                            Tidak ada item pesanan
+                                        </TableCell>
+                                    </TableRow>
+                                )}
                             </TableBody>
                         </Table>
                     </CardContent>
@@ -163,25 +187,23 @@ export default function DetailDaftarPesanan({ id }: { id: string }) {
                                 </span>
                                 <span className="font-medium">
                                     Rp{' '}
-                                    {orderData.subtotal.toLocaleString('id-ID')}
+                                    {pesanan.subtotal.toLocaleString('id-ID')}
                                 </span>
                             </div>
-                            <div className="flex justify-between text-base">
+                            {/* <div className="flex justify-between text-base">
                                 <span className="text-muted-foreground">
                                     Pajak (10%)
                                 </span>
                                 <span className="font-medium">
-                                    Rp {orderData.tax.toLocaleString('id-ID')}
+                                    Rp {pesanan.tax.toLocaleString('id-ID')}
                                 </span>
-                            </div>
+                            </div> */}
                             <div className="border-t border-border pt-3">
                                 <div className="flex justify-between text-xl font-bold">
                                     <span>Grand Total</span>
                                     <span className="text-primary">
                                         Rp{' '}
-                                        {orderData.total.toLocaleString(
-                                            'id-ID',
-                                        )}
+                                        {pesanan.total.toLocaleString('id-ID')}
                                     </span>
                                 </div>
                             </div>
@@ -226,7 +248,7 @@ export default function DetailDaftarPesanan({ id }: { id: string }) {
                             <p>
                                 Apakah Anda yakin ingin menghapus pesanan{' '}
                                 <span className="font-semibold">
-                                    {orderData.orderNumber}
+                                    {pesanan.nomor_pesanan}
                                 </span>
                                 ?
                             </p>

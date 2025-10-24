@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Karyawan;
 use Illuminate\Http\Request;
+use Inertia\Inertia;
 
 class KaryawanController extends Controller
 {
@@ -12,7 +13,9 @@ class KaryawanController extends Controller
      */
     public function index()
     {
-        //
+        return Inertia::render('karyawan', [
+            'karyawans' => Karyawan::all()
+        ]);
     }
 
     /**

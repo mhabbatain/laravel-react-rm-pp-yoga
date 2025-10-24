@@ -16,12 +16,20 @@ class DatabaseSeeder extends Seeder
         // User::factory(10)->create();
 
         User::firstOrCreate(
-            ['email' => 'test@example.com'],
+            ['email' => 'admin@gmail.com'],
             [
-                'name' => 'Test User',
-                'password' => 'password',
+                'name' => 'admin',
+                'password' => 'admin123',
                 'email_verified_at' => now(),
             ]
         );
+
+        $this->call([
+            KategoriSeeder::class,
+            MenuSeeder::class,
+            KaryawanSeeder::class,
+            PesananSeeder::class,
+            DetailPesananSeeder::class
+        ]);
     }
 }

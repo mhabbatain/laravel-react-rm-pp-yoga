@@ -9,7 +9,11 @@ import {
     SidebarMenuButton,
     SidebarMenuItem,
 } from '@/components/ui/sidebar';
-import { beranda, daftarMenu, daftarPesanan, karyawan, pos } from '@/routes';
+import { beranda } from '@/routes';
+import daftarMenu from '@/routes/daftar-menu';
+import daftarPesanan from '@/routes/daftar-pesanan';
+import karyawan from '@/routes/karyawan';
+import pos from '@/routes/pos';
 import { type NavItem } from '@/types';
 import { Link } from '@inertiajs/react';
 import {
@@ -29,22 +33,22 @@ const mainNavItems: NavItem[] = [
     },
     {
         title: 'POS',
-        href: pos(),
+        href: pos.index(),
         icon: Store,
     },
     {
         title: 'Daftar Pesanan',
-        href: daftarPesanan(),
+        href: daftarPesanan.index(),
         icon: FileText,
     },
     {
         title: 'Karyawan',
-        href: karyawan(),
+        href: karyawan.index(),
         icon: UsersRound,
     },
     {
         title: 'Daftar Menu',
-        href: daftarMenu(),
+        href: daftarMenu.index(),
         icon: Utensils,
     },
 ];

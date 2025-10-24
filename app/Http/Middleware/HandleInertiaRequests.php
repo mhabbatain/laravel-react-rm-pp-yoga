@@ -2,6 +2,8 @@
 
 namespace App\Http\Middleware;
 
+use App\Models\Kategori;
+use App\Models\Menu;
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
@@ -46,6 +48,9 @@ class HandleInertiaRequests extends Middleware
                 'user' => $request->user(),
             ],
             'sidebarOpen' => ! $request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',
+            // 'kategoris' => fn() => Kategori::select('id', 'nama')->get(),
+            // 'menuItems' => fn() => Menu::select('id', 'nama_menu', 'harga', 'stok', 'gambar')->get(),
+
         ];
     }
 }

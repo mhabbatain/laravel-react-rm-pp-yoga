@@ -2,7 +2,7 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
-import { OrderItem } from '@/types/menu';
+import { OrderItem } from '@/types';
 import { CreditCard, Minus, Plus, RotateCcw, Trash2 } from 'lucide-react';
 import {
     Select,
@@ -16,8 +16,8 @@ import {
 
 interface OrderPanelProps {
     orders: OrderItem[];
-    onUpdateQuantity: (id: string, quantity: number) => void;
-    onRemoveItem: (id: string) => void;
+    onUpdateQuantity: (id: number, quantity: number) => void;
+    onRemoveItem: (id: number) => void;
     onReset: () => void;
     onPay: () => void;
 }
@@ -30,7 +30,7 @@ export default function OrderPanel({
     onPay,
 }: OrderPanelProps) {
     const total = orders.reduce(
-        (sum, item) => sum + item.price * item.quantity,
+        (sum, item) => sum + item.harga * item.quantity,
         0,
     );
     return (
@@ -67,11 +67,11 @@ export default function OrderPanel({
                                 <div className="flex items-start justify-between gap-3">
                                     <div className="min-w-0 flex-1">
                                         <h3 className="mb-1 truncate font-semibold text-foreground">
-                                            {item.name}
+                                            {item.nama_menu}
                                         </h3>
                                         <p className="text-sm font-medium text-primary">
                                             Rp{' '}
-                                            {item.price.toLocaleString('id-ID')}
+                                            {item.harga.toLocaleString('id-ID')}
                                         </p>
                                     </div>
 
@@ -126,7 +126,7 @@ export default function OrderPanel({
                                     <span className="text-lg font-bold text-foreground">
                                         Rp{' '}
                                         {(
-                                            item.price * item.quantity
+                                            item.harga * item.quantity
                                         ).toLocaleString('id-ID')}
                                     </span>
                                 </div>

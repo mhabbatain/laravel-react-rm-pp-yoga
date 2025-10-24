@@ -10,35 +10,33 @@ import {
     TableHeader,
     TableRow,
 } from '@/components/ui/table';
-import { orders as ordersData } from '@/data/orders';
 import AppLayout from '@/layouts/app-layout';
-import { daftarPesanan } from '@/routes';
-import { BreadcrumbItem } from '@/types';
-import { Head, Link } from '@inertiajs/react';
+import daftarPesanan from '@/routes/daftar-pesanan';
+import { BreadcrumbItem, SharedData } from '@/types';
+import { Head, Link, usePage } from '@inertiajs/react';
 import { Eye, Search } from 'lucide-react';
 import { useState } from 'react';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
         title: 'Daftar Pesanan',
-        href: daftarPesanan().url,
+        href: daftarPesanan.index().url,
     },
 ];
 
 export default function DaftarPesanan() {
+    // DATA
+    const { pesanans } = usePage<SharedData>().props;
+
     const [searchQuery, setSearchQuery] = useState('');
 
     // Centralized order data
-    const orders = ordersData;
+    // const orders = ordersData;
 
-    const filteredOrders = orders.filter((order) => {
-        const matchesSearch =
-            order.orderNumber
-                .toLowerCase()
-                .includes(searchQuery.toLowerCase()) ||
-            order.customerName
-                .toLowerCase()
-                .includes(searchQuery.toLowerCase());
+    const filteredOrders = pesanans?.filter((pesanan) => {
+        const matchesSearch = pesanan.nomor_pesanan
+            .toLowerCase()
+            .includes(searchQuery.toLowerCase());
         return matchesSearch;
     });
     return (
@@ -63,7 +61,7 @@ export default function DaftarPesanan() {
                             <div className="relative flex-1">
                                 <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                                 <Input
-                                    placeholder="Cari nomor pesanan atau nama pelanggan..."
+                                    placeholder="Cari nomor pesanan..."
                                     value={searchQuery}
                                     onChange={(e) =>
                                         setSearchQuery(e.target.value)
@@ -78,7 +76,9 @@ export default function DaftarPesanan() {
                 {/* Orders Table */}
                 <Card>
                     <CardHeader>
-                        <CardTitle>Pesanan ({filteredOrders.length})</CardTitle>
+                        <CardTitle>
+                            Pesanan ({filteredOrders?.length})
+                        </CardTitle>
                     </CardHeader>
                     <CardContent>
                         <Table>
@@ -86,9 +86,9 @@ export default function DaftarPesanan() {
                                 <TableRow>
                                     <TableHead>Nomor Pesanan</TableHead>
                                     <TableHead>Waktu</TableHead>
-                                    <TableHead className="text-center">
+                                    {/* <TableHead className="text-center">
                                         Item
-                                    </TableHead>
+                                    </TableHead> */}
                                     <TableHead className="text-right">
                                         Total
                                     </TableHead>
@@ -98,29 +98,29 @@ export default function DaftarPesanan() {
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
-                                {filteredOrders.map((order) => (
+                                {filteredOrders?.map((pesanan) => (
                                     <TableRow
-                                        key={order.id}
+                                        key={pesanan.id}
                                         className="cursor-pointer hover:bg-muted/50"
                                     >
                                         <TableCell className="font-medium">
-                                            {order.orderNumber}
+                                            {pesanan.nomor_pesanan}
                                         </TableCell>
                                         <TableCell className="text-muted-foreground">
-                                            {order.orderTime}
+                                            {pesanan.created_at}
                                         </TableCell>
-                                        <TableCell className="text-center">
-                                            {order.itemCount} item
-                                        </TableCell>
+                                        {/* <TableCell className="text-center">
+                                            {pesanan.itemCount} item
+                                        </TableCell> */}
                                         <TableCell className="text-right font-semibold">
                                             Rp{' '}
-                                            {order.total.toLocaleString(
+                                            {pesanan.total.toLocaleString(
                                                 'id-ID',
                                             )}
                                         </TableCell>
                                         <TableCell className="text-center">
                                             <Link
-                                                href={`/daftar-pesanan/${order.id}`}
+                                                href={`/daftar-pesanan/${pesanan.id}`}
                                             >
                                                 <Button
                                                     variant="outline"
@@ -135,7 +135,7 @@ export default function DaftarPesanan() {
                                 ))}
                             </TableBody>
                         </Table>
-                        {filteredOrders.length === 0 && (
+                        {filteredOrders?.length === 0 && (
                             <div className="py-12 text-center text-muted-foreground">
                                 Tidak ada pesanan yang ditemukan
                             </div>

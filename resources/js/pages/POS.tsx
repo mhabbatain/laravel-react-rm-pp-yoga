@@ -2,24 +2,31 @@ import MainContainer from '@/components/main-container';
 import MenuCard from '@/components/menu-card';
 import OrderPanel from '@/components/order-panel';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { menuItems } from '@/data/menuData';
 import AppLayout from '@/layouts/app-layout';
-import { pos } from '@/routes';
-import { BreadcrumbItem } from '@/types';
-import { MenuItem, OrderItem } from '@/types/menu';
-import { Head } from '@inertiajs/react';
-import { Coffee, Plus, UtensilsCrossed } from 'lucide-react';
+import pos from '@/routes/pos';
+import { BreadcrumbItem, MenuItem, OrderItem, SharedData } from '@/types';
+import { Head, usePage } from '@inertiajs/react';
+import { Coffee, PlusCircle, UtensilsCrossed } from 'lucide-react';
 import { useState } from 'react';
 import { toast } from 'sonner';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
         title: 'POS',
-        href: pos().url,
+        href: pos.index().url,
     },
 ];
 
+const categoryIcons: Record<string, React.ElementType> = {
+    makanan: UtensilsCrossed,
+    minuman: Coffee,
+    tambahan: PlusCircle,
+};
+
 export default function POS() {
+    // DATA
+    const { kategoris, menuItems } = usePage<SharedData>().props;
+
     const [orders, setOrders] = useState<OrderItem[]>([]);
     const [activeCategory, setActiveCategory] = useState<
         'makanan' | 'minuman' | 'tambahan'
@@ -30,14 +37,14 @@ export default function POS() {
 
         if (existingOrder) {
             setOrders(orders.filter((order) => order.id !== item.id));
-            toast.info(`${item.name} dihapus dari pesanan`);
+            toast.info(`${item.nama_menu} dihapus dari pesanan`);
         } else {
             setOrders([...orders, { ...item, quantity: 1 }]);
-            toast.success(`${item.name} ditambahkan ke pesanan`);
+            toast.success(`${item.nama_menu} ditambahkan ke pesanan`);
         }
     };
 
-    const handleUpdateQuantity = (id: string, quantity: number) => {
+    const handleUpdateQuantity = (id: number, quantity: number) => {
         setOrders(
             orders.map((order) =>
                 order.id === id ? { ...order, quantity } : order,
@@ -45,11 +52,11 @@ export default function POS() {
         );
     };
 
-    const handleRemoveItem = (id: string) => {
+    const handleRemoveItem = (id: number) => {
         const item = orders.find((order) => order.id === id);
         setOrders(orders.filter((order) => order.id !== id));
         if (item) {
-            toast.info(`${item.name} dihapus dari pesanan`);
+            toast.info(`${item.nama_menu} dihapus dari pesanan`);
         }
     };
 
@@ -60,7 +67,7 @@ export default function POS() {
 
     const handlePay = () => {
         const total = orders.reduce(
-            (sum, item) => sum + item.price * item.quantity,
+            (sum, item) => sum + item.harga * item.quantity,
             0,
         );
         toast.success(
@@ -69,10 +76,7 @@ export default function POS() {
         setOrders([]);
     };
 
-    const filteredItems = menuItems.filter(
-        (item) => item.category === activeCategory,
-    );
-    const isItemSelected = (id: string) =>
+    const isItemSelected = (id: number) =>
         orders.some((order) => order.id === id);
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
@@ -103,51 +107,55 @@ export default function POS() {
                                 className="flex flex-1 flex-col"
                             >
                                 <TabsList className="mb-6 grid h-auto w-full grid-cols-3 p-1">
-                                    <TabsTrigger
-                                        value="makanan"
-                                        className="flex items-center gap-2 py-3 text-base data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
-                                    >
-                                        <UtensilsCrossed className="h-5 w-5" />
-                                        Makanan
-                                    </TabsTrigger>
-                                    <TabsTrigger
-                                        value="minuman"
-                                        className="flex items-center gap-2 py-3 text-base data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
-                                    >
-                                        <Coffee className="h-5 w-5" />
-                                        Minuman
-                                    </TabsTrigger>
-                                    <TabsTrigger
-                                        value="tambahan"
-                                        className="flex items-center gap-2 py-3 text-base data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
-                                    >
-                                        <Plus className="h-5 w-5" />
-                                        Tambahan
-                                    </TabsTrigger>
+                                    {kategoris?.map((kat) => {
+                                        const key = kat.nama?.toLowerCase();
+                                        const Icon =
+                                            categoryIcons[key] ||
+                                            UtensilsCrossed;
+
+                                        return (
+                                            <TabsTrigger
+                                                key={kat.id}
+                                                value={key}
+                                                className="flex items-center gap-2 py-3 text-base data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
+                                            >
+                                                <Icon className="h-5 w-5" />
+                                                {kat.nama}
+                                            </TabsTrigger>
+                                        );
+                                    })}
                                 </TabsList>
 
-                                {(
-                                    ['makanan', 'minuman', 'tambahan'] as const
-                                ).map((category) => (
-                                    <TabsContent
-                                        key={category}
-                                        value={category}
-                                        className="mt-0 flex-1 overflow-y-auto"
-                                    >
-                                        <div className="grid grid-cols-2 gap-4 p-2 pb-6 md:grid-cols-3">
-                                            {filteredItems.map((item) => (
-                                                <MenuCard
-                                                    key={item.id}
-                                                    item={item}
-                                                    isSelected={isItemSelected(
-                                                        item.id,
-                                                    )}
-                                                    onSelect={handleSelectItem}
-                                                />
-                                            ))}
-                                        </div>
-                                    </TabsContent>
-                                ))}
+                                {kategoris.map((kat) => {
+                                    const filteredItems = menuItems?.filter(
+                                        (item) =>
+                                            item.kategori?.nama?.toLowerCase() ===
+                                            kat.nama.toLowerCase(),
+                                    );
+
+                                    return (
+                                        <TabsContent
+                                            key={kat.id}
+                                            value={kat.nama.toLowerCase()}
+                                            className="mt-0 flex-1 overflow-y-auto"
+                                        >
+                                            <div className="grid grid-cols-2 gap-4 p-2 pb-6 md:grid-cols-3">
+                                                {filteredItems?.map((item) => (
+                                                    <MenuCard
+                                                        key={item.id}
+                                                        item={item}
+                                                        isSelected={isItemSelected(
+                                                            item.id,
+                                                        )}
+                                                        onSelect={
+                                                            handleSelectItem
+                                                        }
+                                                    />
+                                                ))}
+                                            </div>
+                                        </TabsContent>
+                                    );
+                                })}
                             </Tabs>
                         </div>
 

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Pesanan;
 use Illuminate\Http\Request;
+use Inertia\Inertia;
 
 class PesananController extends Controller
 {
@@ -12,7 +13,9 @@ class PesananController extends Controller
      */
     public function index()
     {
-        //
+        return Inertia::render("daftar-pesanan", [
+            "pesanans" => Pesanan::all()
+        ]);
     }
 
     /**
@@ -34,9 +37,14 @@ class PesananController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Pesanan $pesanan)
+    public function show(Pesanan $daftar_pesanan)
     {
-        //
+        // Load relasi detail_pesanans dan menu
+        $daftar_pesanan->load('detail_pesanans.menu');
+
+        return Inertia::render('detail-daftar-pesanan', [
+            'pesanan' => $daftar_pesanan,
+        ]);
     }
 
     /**

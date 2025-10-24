@@ -1,6 +1,6 @@
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { MenuItem } from '@/types/menu';
+import { MenuItem } from '@/types';
 import { Check, Plus } from 'lucide-react';
 
 interface MenuCardProps {
@@ -23,19 +23,19 @@ export default function MenuCard({
         >
             <div className="aspect-4/3 overflow-hidden bg-muted">
                 <img
-                    src={item.image}
-                    alt={item.name}
+                    src={item.gambar}
+                    alt={item.nama_menu}
                     className="h-full w-full object-cover transition-transform duration-300 hover:scale-105"
                 />
             </div>
 
             <div className="p-4">
                 <h3 className="mb-2 text-lg font-semibold text-foreground">
-                    {item.name}
+                    {item.nama_menu}
                 </h3>
                 <div className="flex items-center justify-between">
                     <span className="text-xl font-bold text-primary">
-                        Rp {item.price.toLocaleString('id-ID')}
+                        Rp {item.harga.toLocaleString('id-ID')}
                     </span>
 
                     <Button

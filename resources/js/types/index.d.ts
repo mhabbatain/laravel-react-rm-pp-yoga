@@ -27,6 +27,11 @@ export interface SharedData {
     quote: { message: string; author: string };
     auth: Auth;
     sidebarOpen: boolean;
+    kategoris: Kategori[];
+    menuItems: MenuItem[];
+    karyawans: Karyawan[];
+    pesanans?: Pesanan[];
+    pesanan?: Pesanan;
     [key: string]: unknown;
 }
 
@@ -40,4 +45,84 @@ export interface User {
     created_at: string;
     updated_at: string;
     [key: string]: unknown; // This allows for additional properties...
+}
+
+export interface Kategori {
+    id: number;
+    nama: string;
+}
+
+export interface MenuItem {
+    id: number;
+    nama_menu: string;
+    harga: number;
+    gambar: string;
+    stok: number;
+    kategori?: Kategori;
+}
+
+export interface OrderItem extends MenuItem {
+    quantity: number;
+}
+
+export interface Karyawan {
+    id: number;
+    nama: string;
+    jabatan: EnumJabatan;
+    no_telepon: string;
+    status: EnumStatusKaryawan;
+    pesanans?: Pesanan[];
+}
+
+export interface Pesanan {
+    id: number;
+    meja: EnumNomorMeja;
+    nomor_pesanan: string;
+    waktu: string;
+    total: number;
+    subtotal: number;
+    metode_pembayaran: EnumMetodePembayaran;
+    karyawan?: Karyawan;
+    created_at: string;
+    updated_at: string;
+    detail_pesanan?: DetailPesanan[];
+}
+
+export interface DetailPesanan {
+    id: number;
+    pesanan?: Pesanan;
+    menu?: MenuItem;
+    jumlah: number;
+    subtotal: number;
+    created_at: string;
+    updated_at: string;
+}
+
+// ENUM KARYAWAN
+export enum EnumJabatan {
+    Kasir = 'kasir',
+    Pelayan = 'pelayan',
+    Koki = 'koki',
+    Manajer = 'manajer',
+}
+
+export enum EnumStatusKaryawan {
+    Aktif = 'aktif',
+    Nonaktif = 'nonaktif',
+}
+
+// ENUM PESANAN
+export enum EnumNomorMeja {
+    Satu = '1',
+    Dua = '2',
+    Tiga = '3',
+    Empat = '4',
+    Lima = '5',
+    Enam = '6',
+    Tujuh = '7',
+}
+
+export enum EnumMetodePembayaran {
+    Tunai = 'tunai',
+    Qris = 'qris',
 }

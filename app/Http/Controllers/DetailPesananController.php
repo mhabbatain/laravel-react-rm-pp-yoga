@@ -3,7 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Models\DetailPesanan;
+use App\Models\Pesanan;
 use Illuminate\Http\Request;
+use Inertia\Inertia;
 
 class DetailPesananController extends Controller
 {
@@ -34,9 +36,15 @@ class DetailPesananController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(DetailPesanan $detailPesanan)
+    public function show(Pesanan $pesanan)
     {
-        //
+        // // Load relasi detail_pesanans dan menu serta karyawan
+        // $pesanan->load(['detail_pesanans.menu', 'karyawan']);
+
+        // // Mengirim ke halaman Inertia
+        // return Inertia::render('DetailDaftarPesanan', [
+        //     'pesanan' => $pesanan,
+        // ]);
     }
 
     /**

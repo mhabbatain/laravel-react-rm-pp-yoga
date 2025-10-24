@@ -1,10 +1,7 @@
 import MainContainer from '@/components/main-container';
-import { menuItems } from '@/data/menuData';
 import AppLayout from '@/layouts/app-layout';
-import { daftarMenu } from '@/routes';
-import { BreadcrumbItem } from '@/types';
-import { MenuItem } from '@/types/menu';
-import { Head } from '@inertiajs/react';
+import { BreadcrumbItem, Kategori, MenuItem, SharedData } from '@/types';
+import { Head, usePage } from '@inertiajs/react';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -26,27 +23,28 @@ import {
 } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Textarea } from '@/components/ui/textarea';
+import daftarMenu from '@/routes/daftar-menu';
 import { Edit, Plus, Search, Trash2 } from 'lucide-react';
 import { useState } from 'react';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
         title: 'Daftar Menu',
-        href: daftarMenu().url,
+        href: daftarMenu.index().url,
     },
 ];
 
 export default function DaftarMenu() {
+    // DATA
+    const { menuItems } = usePage<SharedData>().props;
+
     const [searchQuery, setSearchQuery] = useState('');
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
     const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
-    const [menus] = useState<MenuItem[]>(menuItems);
     const [selectedMenu, setSelectedMenu] = useState<MenuItem | null>(null);
     const [previewImage, setPreviewImage] = useState<string | null>(null);
-    const [editPreviewImage, setEditPreviewImage] = useState<string | null>(
-        null,
-    );
+    const [editPreviewImage, setEditPreviewImage] = useState<string | null>(null);
 
     const handleImageChange = (
         e: React.ChangeEvent<HTMLInputElement>,
@@ -66,11 +64,24 @@ export default function DaftarMenu() {
         }
     };
 
-    const filterItems = (category: MenuItem['category']) => {
-        return menus.filter(
+    // const filterItems = (kategori: MenuItem['kategori']) => {
+    //     return menus.filter(
+    //         (item) =>
+    //             item.kategori === kategori &&
+    //             item.nama_menu
+    //                 .toLowerCase()
+    //                 .includes(searchQuery.toLowerCase()),
+    //     );
+    // };
+
+    const filterItems = (kategoriNama: string) => {
+        return menuItems.filter(
             (item) =>
-                item.category === category &&
-                item.name.toLowerCase().includes(searchQuery.toLowerCase()),
+                item.kategori?.nama.toLowerCase() ===
+                    kategoriNama.toLowerCase() &&
+                item.nama_menu
+                    .toLowerCase()
+                    .includes(searchQuery.toLowerCase()),
         );
     };
 
@@ -78,8 +89,8 @@ export default function DaftarMenu() {
         <Card className="transition-shadow hover:shadow-lg">
             <div className="aspect-4/3 overflow-hidden bg-muted">
                 <img
-                    src={item.image}
-                    alt={item.name}
+                    src={item.gambar}
+                    alt={item.nama_menu}
                     className="h-full w-full object-cover transition-transform duration-300 hover:scale-105"
                 />
             </div>
@@ -88,10 +99,10 @@ export default function DaftarMenu() {
                     <div className="flex items-start justify-between">
                         <div className="space-y-1">
                             <h3 className="font-semibold text-foreground">
-                                {item.name}
+                                {item.nama_menu}
                             </h3>
                             <p className="text-xl font-bold text-primary">
-                                Rp {item.price.toLocaleString('id-ID')}
+                                Rp {item.harga.toLocaleString('id-ID')}
                             </p>
                         </div>
                     </div>
@@ -196,11 +207,11 @@ export default function DaftarMenu() {
                                                 />
                                             </div>
                                             <div className="space-y-2">
-                                                <Label htmlFor="price">
+                                                <Label htmlFor="harga">
                                                     Harga
                                                 </Label>
                                                 <Input
-                                                    id="price"
+                                                    id="harga"
                                                     type="number"
                                                     placeholder="25000"
                                                 />
@@ -216,7 +227,7 @@ export default function DaftarMenu() {
                                                 />
                                             </div>
                                             <div className="space-y-2">
-                                                <Label htmlFor="category">
+                                                <Label htmlFor="kategori">
                                                     Kategori
                                                 </Label>
                                                 <Select>
@@ -342,13 +353,13 @@ export default function DaftarMenu() {
                                 <Input
                                     id="edit-name"
                                     placeholder="Masukkan nama menu"
-                                    value={selectedMenu?.name}
+                                    value={selectedMenu?.nama_menu}
                                     onChange={(e) =>
                                         setSelectedMenu(
                                             selectedMenu
                                                 ? {
                                                       ...selectedMenu,
-                                                      name: e.target.value,
+                                                      nama_menu: e.target.value,
                                                   }
                                                 : null,
                                         )
@@ -356,18 +367,18 @@ export default function DaftarMenu() {
                                 />
                             </div>
                             <div className="space-y-2">
-                                <Label htmlFor="edit-price">Harga</Label>
+                                <Label htmlFor="edit-harga">Harga</Label>
                                 <Input
-                                    id="edit-price"
+                                    id="edit-harga"
                                     type="number"
                                     placeholder="25000"
-                                    value={selectedMenu?.price}
+                                    value={selectedMenu?.harga}
                                     onChange={(e) =>
                                         setSelectedMenu(
                                             selectedMenu
                                                 ? {
                                                       ...selectedMenu,
-                                                      price: Number(
+                                                      harga: Number(
                                                           e.target.value,
                                                       ),
                                                   }
@@ -398,16 +409,17 @@ export default function DaftarMenu() {
                                 />
                             </div>
                             <div className="space-y-2">
-                                <Label htmlFor="edit-category">Kategori</Label>
+                                <Label htmlFor="edit-kategori">Kategori</Label>
                                 <Select
-                                    value={selectedMenu?.category}
+                                    value={selectedMenu?.kategori?.nama}
                                     onValueChange={(value) =>
                                         setSelectedMenu(
                                             selectedMenu
                                                 ? {
                                                       ...selectedMenu,
-                                                      category:
-                                                          value as MenuItem['category'],
+                                                      kategori: {
+                                                          nama: value,
+                                                      } as Kategori,
                                                   }
                                                 : null,
                                         )
@@ -435,9 +447,9 @@ export default function DaftarMenu() {
                                     <img
                                         src={
                                             editPreviewImage ||
-                                            selectedMenu?.image
+                                            selectedMenu?.gambar
                                         }
-                                        alt={selectedMenu?.name}
+                                        alt={selectedMenu?.nama_menu}
                                         className="aspect-video h-auto w-full object-cover"
                                     />
                                 </div>
@@ -488,7 +500,7 @@ export default function DaftarMenu() {
                             <p>
                                 Apakah Anda yakin ingin menghapus menu{' '}
                                 <span className="font-semibold">
-                                    {selectedMenu?.name}
+                                    {selectedMenu?.nama_menu}
                                 </span>
                                 ?
                             </p>

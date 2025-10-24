@@ -7,6 +7,3 @@ export interface MenuItem {
     stok: number;
 }
 
-export interface OrderItem extends MenuItem {
-    quantity: number;
-}

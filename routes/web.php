@@ -1,5 +1,10 @@
 <?php
 
+use App\Http\Controllers\DetailPesananController;
+use App\Http\Controllers\KaryawanController;
+use App\Http\Controllers\MenuController;
+use App\Http\Controllers\PesananController;
+use App\Http\Controllers\POSController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use Laravel\Fortify\Features;
@@ -16,12 +21,13 @@ Route::middleware(['auth', 'verified'])->group(function () {
     })->name('beranda');
 });
 
-Route::get('/pos', fn() => inertia('POS'))->name('pos');
-Route::get('/daftar-pesanan', fn() => inertia('daftar-pesanan'))->name('daftar-pesanan');
-Route::get('/daftar-pesanan/{id}', fn($id) => inertia('detail-daftar-pesanan', ['id' => $id]))->name('detail-daftar-pesanan');
+// Route::get('/pos', fn() => inertia('POS'))->name('pos');
+Route::resource('pos', POSController::class);
+Route::resource('karyawan', KaryawanController::class);
+// Route::resource('daftar-pesanan', DetailPesananController::class);
+Route::resource('daftar-pesanan', PesananController::class);
+Route::resource('daftar-menu', MenuController::class);
 
-Route::get('/karyawan', fn() => inertia('karyawan'))->name('karyawan');
-Route::get('/daftar-menu', fn() => inertia('daftar-menu'))->name('daftar-menu');
 
 
 require __DIR__ . '/settings.php';

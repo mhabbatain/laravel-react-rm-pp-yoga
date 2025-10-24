@@ -13,6 +13,7 @@ return new class extends Migration
     {
         Schema::create('menus', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('id_kategori')->constrained('kategoris')->onDelete('cascade');
             $table->timestamps();
             $table->string("gambar");
             $table->string("nama_menu");
