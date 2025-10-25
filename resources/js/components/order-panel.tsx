@@ -4,6 +4,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
 import { OrderItem } from '@/types';
 import { CreditCard, Minus, Plus, RotateCcw, Trash2 } from 'lucide-react';
+import { useState } from 'react';
 import {
     Select,
     SelectContent,
@@ -19,7 +20,7 @@ interface OrderPanelProps {
     onUpdateQuantity: (id: number, quantity: number) => void;
     onRemoveItem: (id: number) => void;
     onReset: () => void;
-    onPay: () => void;
+    onPay: (meja: string, metodePembayaran: string) => void;
 }
 
 export default function OrderPanel({
@@ -29,6 +30,9 @@ export default function OrderPanel({
     onReset,
     onPay,
 }: OrderPanelProps) {
+    const [selectedPayment, setSelectedPayment] = useState('tunai');
+    const [selectedTable, setSelectedTable] = useState('1');
+
     const total = orders.reduce(
         (sum, item) => sum + item.harga * item.quantity,
         0,
@@ -139,7 +143,6 @@ export default function OrderPanel({
             {orders.length > 0 && (
                 <>
                     <Separator />
-
                     <div className="space-y-4 bg-linear-to-br from-primary/5 to-transparent p-6">
                         <div className="flex items-center justify-between text-2xl font-bold">
                             <span className="text-foreground">Total</span>
@@ -147,8 +150,13 @@ export default function OrderPanel({
                                 Rp {total.toLocaleString('id-ID')}
                             </span>
                         </div>
+
+                        {/* Select Payment & Table */}
                         <div className="flex flex-row gap-x-2">
-                            <Select>
+                            <Select
+                                onValueChange={setSelectedPayment}
+                                defaultValue={selectedPayment}
+                            >
                                 <SelectTrigger>
                                     <SelectValue placeholder="Metode Pembayaran" />
                                 </SelectTrigger>
@@ -157,8 +165,8 @@ export default function OrderPanel({
                                         <SelectLabel>
                                             Pilih metode pembayaran
                                         </SelectLabel>
-                                        <SelectItem value="cash">
-                                            Cash
+                                        <SelectItem value="tunai">
+                                            Tunai
                                         </SelectItem>
                                         <SelectItem value="qris">
                                             QRIS
@@ -166,7 +174,11 @@ export default function OrderPanel({
                                     </SelectGroup>
                                 </SelectContent>
                             </Select>
-                            <Select>
+
+                            <Select
+                                onValueChange={setSelectedTable}
+                                defaultValue={selectedTable}
+                            >
                                 <SelectTrigger>
                                     <SelectValue placeholder="Nomor Meja" />
                                 </SelectTrigger>
@@ -184,7 +196,7 @@ export default function OrderPanel({
                                             '6',
                                             '7',
                                         ].map((item) => (
-                                            <SelectItem value={item}>
+                                            <SelectItem key={item} value={item}>
                                                 {item}
                                             </SelectItem>
                                         ))}
@@ -193,6 +205,7 @@ export default function OrderPanel({
                             </Select>
                         </div>
 
+                        {/* Buttons */}
                         <div className="grid grid-cols-2 gap-3">
                             <Button
                                 variant="outline"
@@ -205,7 +218,10 @@ export default function OrderPanel({
 
                             <Button
                                 className="w-full transition-opacity hover:opacity-90"
-                                onClick={onPay}
+                                onClick={() =>
+                                    onPay(selectedTable, selectedPayment)
+                                }
+                                disabled={!selectedPayment || !selectedTable}
                             >
                                 <CreditCard className="mr-2 h-4 w-4" />
                                 Bayar

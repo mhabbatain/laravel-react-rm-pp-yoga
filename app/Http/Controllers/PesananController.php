@@ -13,8 +13,12 @@ class PesananController extends Controller
      */
     public function index()
     {
-        return Inertia::render("daftar-pesanan", [
-            "pesanans" => Pesanan::all()
+        // return Inertia::render("daftar-pesanan", [
+        //     "pesanans" => Pesanan::all()
+        // ]);
+        $pesanans = Pesanan::with('detail_pesanans')->get();
+        return Inertia::render('daftar-pesanan', [
+            'pesanans' => $pesanans,
         ]);
     }
 
@@ -29,10 +33,7 @@ class PesananController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
-    {
-        //
-    }
+    public function store(Request $request) {}
 
     /**
      * Display the specified resource.

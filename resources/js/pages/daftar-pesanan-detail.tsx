@@ -16,6 +16,7 @@ import {
     TableRow,
 } from '@/components/ui/table';
 import AppLayout from '@/layouts/app-layout';
+import { formatDateTime } from '@/lib/utils';
 import daftarPesanan from '@/routes/daftar-pesanan';
 import {
     BreadcrumbItem,
@@ -57,25 +58,8 @@ export default function DaftarPesananDetail() {
         },
     ];
 
-    const formattedDateTime = (() => {
-        if (!pesanan.created_at) return '-';
-        const date = new Date(pesanan.created_at);
-        if (isNaN(date.getTime())) return '-';
+    const formattedDateTime = formatDateTime(pesanan.created_at);
 
-        const tanggal = date.toLocaleDateString('id-ID', {
-            day: '2-digit',
-            month: 'long',
-            year: 'numeric',
-        });
-
-        const waktu = date.toLocaleTimeString('id-ID', {
-            hour: '2-digit',
-            minute: '2-digit',
-            second: '2-digit',
-        });
-
-        return `${tanggal} - ${waktu}`;
-    })();
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="DetailDaftarPesanan" />

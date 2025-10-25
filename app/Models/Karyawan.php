@@ -14,7 +14,8 @@ class Karyawan extends Model
         'nama',
         'jabatan',
         'no_telepon',
-        'alamat'
+        'alamat',
+        'status'
     ];
 
     public function pesanans()

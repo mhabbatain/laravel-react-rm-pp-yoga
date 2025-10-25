@@ -208,4 +208,16 @@
     body {
         @apply bg-background text-foreground;
     }
+    /* .toast-success {
+        @apply border-success text-success border bg-green-100;
+    }
+    .toast-error {
+        @apply border-destructive bg-destructive-100 text-destructive border;
+    }
+    .toast-warning {
+        @apply border-warning bg-warning text-warning border;
+    }
+    .toast-info {
+        @apply border-info bg-info border;
+    } */
 }

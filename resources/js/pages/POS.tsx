@@ -5,7 +5,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import AppLayout from '@/layouts/app-layout';
 import pos from '@/routes/pos';
 import { BreadcrumbItem, MenuItem, OrderItem, SharedData } from '@/types';
-import { Head, usePage } from '@inertiajs/react';
+import { Head, router, usePage } from '@inertiajs/react';
 import { Coffee, PlusCircle, UtensilsCrossed } from 'lucide-react';
 import { useState } from 'react';
 import { toast } from 'sonner';
@@ -37,10 +37,17 @@ export default function POS() {
 
         if (existingOrder) {
             setOrders(orders.filter((order) => order.id !== item.id));
-            toast.info(`${item.nama_menu} dihapus dari pesanan`);
+            // toast.info(`${item.nama_menu} dihapus dari pesanan`);
         } else {
             setOrders([...orders, { ...item, quantity: 1 }]);
-            toast.success(`${item.nama_menu} ditambahkan ke pesanan`);
+            toast.success(`${item.nama_menu} ditambahkan ke pesanan`, {
+                style: {
+                    backgroundColor: '#dcfce7',
+                    color: '#166534',
+                    border: '1px solid #22c55e',
+                },
+                icon: '✅',
+            });
         }
     };
 
@@ -65,15 +72,41 @@ export default function POS() {
         toast.info('Pesanan direset');
     };
 
-    const handlePay = () => {
+    const handlePay = (meja: string, metodePembayaran: string) => {
+        if (orders.length === 0) {
+            toast.error('Belum ada pesanan');
+            return;
+        }
+
         const total = orders.reduce(
             (sum, item) => sum + item.harga * item.quantity,
             0,
         );
-        toast.success(
-            `Pembayaran sebesar Rp ${total.toLocaleString('id-ID')} berhasil!`,
-        );
-        setOrders([]);
+
+        // Siapkan data untuk dikirim ke backend
+        const payload = {
+            id_karyawan: 1, // sementara hardcode, bisa diganti user auth
+            meja: meja,
+            metode_pembayaran: metodePembayaran,
+            detail_pesanans: orders.map((item) => ({
+                id_menu: item.id,
+                jumlah: item.quantity,
+                subtotal: item.harga * item.quantity,
+            })),
+        };
+
+        router.post('/pos', payload, {
+            onSuccess: () => {
+                toast.success(
+                    `Pesanan berhasil disimpan (Total Rp ${total.toLocaleString('id-ID')})`,
+                );
+                setOrders([]);
+            },
+            onError: (errors) => {
+                console.error(errors);
+                toast.error('Gagal menyimpan pesanan');
+            },
+        });
     };
 
     const isItemSelected = (id: number) =>

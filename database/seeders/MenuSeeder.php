@@ -26,42 +26,43 @@ class MenuSeeder extends Seeder
             [
                 'nama_menu' => 'Nasi Goreng Special',
                 'harga' => 25000,
-                'gambar' => '/menu/nasi-goreng.jpg',
+                // PERBAIKAN: Path disesuaikan dengan controller
+                'gambar' => 'menu-images/nasi-goreng.jpg',
                 'stok' => 12,
                 'id_kategori' => $kategoris['makanan'],
             ],
             [
                 'nama_menu' => 'Mie Goreng',
                 'harga' => 20000,
-                'gambar' => '/menu/mie-goreng.jpg',
+                'gambar' => 'menu-images/mie-goreng.jpg',
                 'stok' => 10,
                 'id_kategori' => $kategoris['makanan'],
             ],
             [
                 'nama_menu' => 'Ayam Geprek',
                 'harga' => 22000,
-                'gambar' => '/menu/ayam-geprek.jpg',
+                'gambar' => 'menu-images/ayam-geprek.jpg',
                 'stok' => 8,
                 'id_kategori' => $kategoris['makanan'],
             ],
             [
                 'nama_menu' => 'Soto Ayam',
                 'harga' => 18000,
-                'gambar' => '/menu/soto-ayam.jpg',
+                'gambar' => 'menu-images/soto-ayam.jpg',
                 'stok' => 2,
                 'id_kategori' => $kategoris['makanan'],
             ],
             [
                 'nama_menu' => 'Nasi Uduk',
                 'harga' => 15000,
-                'gambar' => '/menu/nasi-uduk.jpg',
+                'gambar' => 'menu-images/nasi-uduk.jpg',
                 'stok' => 3,
                 'id_kategori' => $kategoris['makanan'],
             ],
             [
                 'nama_menu' => 'Gado-Gado',
                 'harga' => 17000,
-                'gambar' => '/menu/gado-gado.jpg',
+                'gambar' => 'menu-images/gado-gado.jpg',
                 'stok' => 4,
                 'id_kategori' => $kategoris['makanan'],
             ],
@@ -70,42 +71,42 @@ class MenuSeeder extends Seeder
             [
                 'nama_menu' => 'Es Teh Manis',
                 'harga' => 5000,
-                'gambar' => '/menu/es-teh.jpg',
+                'gambar' => 'menu-images/es-teh.jpg',
                 'stok' => 5,
                 'id_kategori' => $kategoris['minuman'],
             ],
             [
                 'nama_menu' => 'Es Jeruk',
                 'harga' => 7000,
-                'gambar' => '/menu/es-jeruk.jpg',
+                'gambar' => 'menu-images/es-jeruk.jpg',
                 'stok' => 10,
                 'id_kategori' => $kategoris['minuman'],
             ],
             [
                 'nama_menu' => 'Es Kelapa Muda',
                 'harga' => 12000,
-                'gambar' => '/menu/es-kelapa.jpg',
+                'gambar' => 'menu-images/es-kelapa.jpg',
                 'stok' => 10,
                 'id_kategori' => $kategoris['minuman'],
             ],
             [
                 'nama_menu' => 'Jus Alpukat',
                 'harga' => 15000,
-                'gambar' => '/menu/jus-alpukat.jpg',
+                'gambar' => 'menu-images/jus-alpukat.jpg',
                 'stok' => 10,
                 'id_kategori' => $kategoris['minuman'],
             ],
             [
                 'nama_menu' => 'Kopi Hitam',
                 'harga' => 8000,
-                'gambar' => '/menu/kopi-hitam.jpg',
+                'gambar' => 'menu-images/kopi-hitam.jpg',
                 'stok' => 10,
                 'id_kategori' => $kategoris['minuman'],
             ],
             [
                 'nama_menu' => 'Teh Poci',
                 'harga' => 6000,
-                'gambar' => '/menu/teh-poci.jpg',
+                'gambar' => 'menu-images/teh-poci.jpg',
                 'stok' => 10,
                 'id_kategori' => $kategoris['minuman'],
             ],
@@ -114,28 +115,28 @@ class MenuSeeder extends Seeder
             [
                 'nama_menu' => 'Kerupuk',
                 'harga' => 2000,
-                'gambar' => '/menu/kerupuk.jpg',
+                'gambar' => 'menu-images/kerupuk.jpg',
                 'stok' => 10,
                 'id_kategori' => $kategoris['tambahan'],
             ],
             [
                 'nama_menu' => 'Telur Mata Sapi',
                 'harga' => 5000,
-                'gambar' => '/menu/telur.jpg',
+                'gambar' => 'menu-images/telur.jpg',
                 'stok' => 10,
                 'id_kategori' => $kategoris['tambahan'],
             ],
             [
                 'nama_menu' => 'Tempe Goreng',
                 'harga' => 3000,
-                'gambar' => '/menu/tempe.jpg',
+                'gambar' => 'menu-images/tempe.jpg',
                 'stok' => 10,
                 'id_kategori' => $kategoris['tambahan'],
             ],
             [
                 'nama_menu' => 'Tahu Goreng',
                 'harga' => 3000,
-                'gambar' => '/menu/tahu.jpg',
+                'gambar' => 'menu-images/tahu.jpg',
                 'stok' => 10,
                 'id_kategori' => $kategoris['tambahan'],
             ],
@@ -143,8 +144,8 @@ class MenuSeeder extends Seeder
 
         foreach ($menus as $menu) {
             Menu::updateOrCreate(
-                ['nama_menu' => $menu['nama_menu']],
-                $menu
+                ['nama_menu' => $menu['nama_menu']], // Cari berdasarkan nama
+                $menu // Update atau create dengan data ini
             );
         }
     }

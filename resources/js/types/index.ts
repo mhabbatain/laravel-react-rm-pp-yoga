@@ -20,6 +20,7 @@ export interface NavItem {
     href: NonNullable<InertiaLinkProps['href']>;
     icon?: LucideIcon | null;
     isActive?: boolean;
+    isAdminOnly?: boolean;
 }
 
 export interface SharedData {
@@ -32,6 +33,8 @@ export interface SharedData {
     karyawans: Karyawan[];
     pesanans?: Pesanan[];
     pesanan?: Pesanan;
+    stats?: Array<{ title: string; value: string }>; // <-- Tambahkan ini (opsional)
+    recentOrders?: Array<RecentOrderItem>; // <-- Tambahkan ini (opsional)
     [key: string]: unknown;
 }
 
@@ -39,12 +42,19 @@ export interface User {
     id: number;
     name: string;
     email: string;
+    role: 'admin' | 'karyawan';
     avatar?: string;
     email_verified_at: string | null;
     two_factor_enabled?: boolean;
     created_at: string;
     updated_at: string;
-    [key: string]: unknown; // This allows for additional properties...
+    [key: string]: unknown;
+}
+
+interface RecentOrderItem {
+    id: string | number; // ID bisa number atau string tergantung tabel
+    total: number;
+    nomor_pesanan: string;
 }
 
 export interface Kategori {
@@ -58,6 +68,7 @@ export interface MenuItem {
     harga: number;
     gambar: string;
     stok: number;
+    id_kategori: number;
     kategori?: Kategori;
 }
 
@@ -95,6 +106,31 @@ export interface DetailPesanan {
     subtotal: number;
     created_at: string;
     updated_at: string;
+}
+
+// POST KARYAWAN
+export interface AddKaryawanPayload {
+    nama: string;
+    jabatan: 'kasir' | 'pelayan' | 'koki' | 'manajer';
+    no_telepon: string;
+    status: 'aktif' | 'nonaktif';
+    [key: string]: string;
+}
+
+// PUT KARYAWAN
+export interface UpdateKaryawanPayload {
+    nama: string;
+    jabatan: 'kasir' | 'pelayan' | 'koki' | 'manajer';
+    no_telepon: string;
+    status: 'aktif' | 'nonaktif';
+}
+
+export interface FormData {
+    nama: string;
+    jabatan: 'kasir' | 'pelayan' | 'koki' | 'manajer';
+    no_telepon: string;
+    status: 'aktif' | 'nonaktif';
+    [key: string]: string;
 }
 
 // ENUM KARYAWAN

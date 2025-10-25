@@ -14,8 +14,8 @@ import daftarMenu from '@/routes/daftar-menu';
 import daftarPesanan from '@/routes/daftar-pesanan';
 import karyawan from '@/routes/karyawan';
 import pos from '@/routes/pos';
-import { type NavItem } from '@/types';
-import { Link } from '@inertiajs/react';
+import { SharedData, type NavItem } from '@/types';
+import { Link, usePage } from '@inertiajs/react';
 import {
     FileText,
     LayoutGrid,
@@ -30,26 +30,31 @@ const mainNavItems: NavItem[] = [
         title: 'Beranda',
         href: beranda(),
         icon: LayoutGrid,
+        isAdminOnly: true,
     },
     {
         title: 'POS',
         href: pos.index(),
         icon: Store,
+        isAdminOnly: false,
     },
     {
         title: 'Daftar Pesanan',
         href: daftarPesanan.index(),
         icon: FileText,
+        isAdminOnly: true,
     },
     {
         title: 'Karyawan',
         href: karyawan.index(),
         icon: UsersRound,
+        isAdminOnly: true,
     },
     {
         title: 'Daftar Menu',
         href: daftarMenu.index(),
         icon: Utensils,
+        isAdminOnly: false,
     },
 ];
 
@@ -62,6 +67,18 @@ const mainNavItems: NavItem[] = [
 // ];
 
 export function AppSidebar() {
+    const { props } = usePage<SharedData>(); // Use GlobalSharedProps
+    const userRole = props.auth.user?.role;
+
+    // Filter navigation items based on user role
+    const visibleNavItems = mainNavItems.filter((item) => {
+        // If item is admin-only, only show if user is admin
+        if (item.isAdminOnly) {
+            return userRole === 'admin';
+        }
+        // Otherwise, show the item to everyone (who is logged in)
+        return true;
+    });
     return (
         <Sidebar collapsible="icon" variant="inset">
             <SidebarHeader>
@@ -77,7 +94,7 @@ export function AppSidebar() {
             </SidebarHeader>
 
             <SidebarContent>
-                <NavMain items={mainNavItems} />
+                <NavMain items={visibleNavItems} />
             </SidebarContent>
 
             <SidebarFooter>

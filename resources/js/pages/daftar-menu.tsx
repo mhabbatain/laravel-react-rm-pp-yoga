@@ -1,7 +1,7 @@
 import MainContainer from '@/components/main-container';
 import AppLayout from '@/layouts/app-layout';
-import { BreadcrumbItem, Kategori, MenuItem, SharedData } from '@/types';
-import { Head, usePage } from '@inertiajs/react';
+import { BreadcrumbItem, MenuItem, SharedData } from '@/types';
+import { Head, router, useForm, usePage } from '@inertiajs/react';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -22,10 +22,10 @@ import {
     SelectValue,
 } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Textarea } from '@/components/ui/textarea';
 import daftarMenu from '@/routes/daftar-menu';
 import { Edit, Plus, Search, Trash2 } from 'lucide-react';
-import { useState } from 'react';
+import { FormEvent, useState } from 'react';
+import { toast } from 'sonner'; // <-- Tambahkan import toast
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -36,7 +36,8 @@ const breadcrumbs: BreadcrumbItem[] = [
 
 export default function DaftarMenu() {
     // DATA
-    const { menuItems } = usePage<SharedData>().props;
+    // Ambil 'menuItems' dan 'kategoris' dari props
+    const { menuItems, kategoris } = usePage<SharedData>().props;
 
     const [searchQuery, setSearchQuery] = useState('');
     const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -44,35 +45,152 @@ export default function DaftarMenu() {
     const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
     const [selectedMenu, setSelectedMenu] = useState<MenuItem | null>(null);
     const [previewImage, setPreviewImage] = useState<string | null>(null);
-    const [editPreviewImage, setEditPreviewImage] = useState<string | null>(null);
+    const [editPreviewImage, setEditPreviewImage] = useState<string | null>(
+        null,
+    );
 
+    // ===============================
+    // FORM STATE (CREATE)
+    // ===============================
+    const {
+        data,
+        setData,
+        post,
+        processing,
+        errors,
+        reset: resetCreateForm,
+    } = useForm({
+        nama_menu: '',
+        id_kategori: '', // Select akan memberikan string
+        harga: '',
+        stok: '',
+        gambar: null as File | null,
+    });
+
+    // ===============================
+    // FORM STATE (EDIT)
+    // ===============================
+    const {
+        data: editData,
+        setData: setEditData,
+        post: updatePost,
+        processing: updateProcessing,
+        errors: editErrors,
+        reset: resetEditForm,
+    } = useForm({
+        nama_menu: '',
+        id_kategori: '',
+        harga: '',
+        stok: '',
+        gambar: null as File | null,
+        _method: 'PUT', // Penting untuk file upload pada method PUT
+    });
+
+    const handleOpenEditDialog = (item: MenuItem) => {
+        // 1. Set item yang dipilih (untuk ID saat delete/update)
+        setSelectedMenu(item);
+
+        // 2. Siapkan data untuk form edit
+        setEditData({
+            nama_menu: item.nama_menu,
+            // (Perbaikan kecil: gunakan id_kategori, bukan kategori.id)
+            id_kategori: String(item.id_kategori),
+            harga: String(item.harga),
+            stok: String(item.stok),
+            gambar: null,
+            _method: 'PUT',
+        });
+
+        // 3. Set gambar preview awal dari data yang ada
+        setEditPreviewImage(`/storage/${item.gambar}`);
+
+        // 4. Buka dialog
+        setIsEditDialogOpen(true);
+    };
+
+    // Handle perubahan file input
     const handleImageChange = (
         e: React.ChangeEvent<HTMLInputElement>,
         isEdit: boolean = false,
     ) => {
         const file = e.target.files?.[0];
         if (file) {
-            const reader = new FileReader();
-            reader.onloadend = () => {
-                if (isEdit) {
-                    setEditPreviewImage(reader.result as string);
-                } else {
-                    setPreviewImage(reader.result as string);
-                }
-            };
-            reader.readAsDataURL(file);
+            if (isEdit) {
+                setEditData('gambar', file);
+                setEditPreviewImage(URL.createObjectURL(file));
+            } else {
+                setData('gambar', file);
+                setPreviewImage(URL.createObjectURL(file));
+            }
         }
     };
 
-    // const filterItems = (kategori: MenuItem['kategori']) => {
-    //     return menus.filter(
-    //         (item) =>
-    //             item.kategori === kategori &&
-    //             item.nama_menu
-    //                 .toLowerCase()
-    //                 .includes(searchQuery.toLowerCase()),
-    //     );
-    // };
+    // ===============================
+    // HANDLER CREATE
+    // ===============================
+    const handleAddMenu = (e: FormEvent) => {
+        e.preventDefault();
+        post('/daftar-menu', {
+            preserveScroll: true,
+            onSuccess: () => {
+                setIsDialogOpen(false);
+                resetCreateForm();
+                setPreviewImage(null);
+                toast.success('Menu berhasil ditambahkan!');
+            },
+            onError: (errors) => {
+                console.error(errors);
+                toast.error(
+                    'Gagal menambahkan menu. Periksa kembali isian Anda.',
+                );
+            },
+        });
+    };
+
+    // ===============================
+    // HANDLER UPDATE
+    // ===============================
+    const handleEditMenu = (e: FormEvent) => {
+        e.preventDefault();
+        if (!selectedMenu) return;
+
+        // Inertia.js memerlukan POST untuk 'multipart/form-data'
+        // 'editData' sudah mengandung _method: 'PUT'
+        updatePost(`/daftar-menu/${selectedMenu.id}`, {
+            preserveScroll: true,
+            onSuccess: () => {
+                setIsEditDialogOpen(false);
+                resetEditForm();
+                setEditPreviewImage(null);
+                setSelectedMenu(null);
+                toast.success('Menu berhasil diperbarui!');
+            },
+            onError: (errors) => {
+                console.error(errors);
+                toast.error(
+                    'Gagal memperbarui menu. Periksa kembali isian Anda.',
+                );
+            },
+        });
+    };
+
+    // ===============================
+    // HANDLER DELETE
+    // ===============================
+    const handleDeleteMenu = () => {
+        if (!selectedMenu) return;
+        router.delete(`/daftar-menu/${selectedMenu.id}`, {
+            preserveScroll: true,
+            onSuccess: () => {
+                setIsDeleteDialogOpen(false);
+                setSelectedMenu(null);
+                toast.success('Menu berhasil dihapus!');
+            },
+            onError: () => {
+                toast.error('Gagal menghapus menu.');
+            },
+        });
+    };
 
     const filterItems = (kategoriNama: string) => {
         return menuItems.filter(
@@ -86,52 +204,49 @@ export default function DaftarMenu() {
     };
 
     const MenuCard = ({ item }: { item: MenuItem }) => (
-        <Card className="transition-shadow hover:shadow-lg">
-            <div className="aspect-4/3 overflow-hidden bg-muted">
+        <Card className="flex flex-col overflow-hidden transition-shadow hover:shadow-lg">
+            <div className="aspect-video overflow-hidden bg-muted">
                 <img
-                    src={item.gambar}
+                    // Perbaiki path gambar untuk mengambil dari /storage/
+                    src={`/storage/${item.gambar}`}
                     alt={item.nama_menu}
                     className="h-full w-full object-cover transition-transform duration-300 hover:scale-105"
                 />
             </div>
-            <CardContent>
-                <div className="space-y-4">
-                    <div className="flex items-start justify-between">
-                        <div className="space-y-1">
-                            <h3 className="font-semibold text-foreground">
-                                {item.nama_menu}
-                            </h3>
-                            <p className="text-xl font-bold text-primary">
-                                Rp {item.harga.toLocaleString('id-ID')}
-                            </p>
-                        </div>
-                    </div>
-                    <div className="flex gap-2">
-                        <Button
-                            variant="outline"
-                            size="sm"
-                            className="flex-1"
-                            onClick={() => {
-                                setSelectedMenu(item);
-                                setIsEditDialogOpen(true);
-                            }}
-                        >
-                            <Edit className="mr-2 h-3 w-3" />
-                            Edit
-                        </Button>
-                        <Button
-                            variant="outline"
-                            size="sm"
-                            className="flex-1"
-                            onClick={() => {
-                                setSelectedMenu(item);
-                                setIsDeleteDialogOpen(true);
-                            }}
-                        >
-                            <Trash2 className="mr-2 h-3 w-3 text-destructive" />
-                            Hapus
-                        </Button>
-                    </div>
+            <CardContent className="flex flex-1 flex-col justify-between space-y-4 p-4">
+                <div className="space-y-1">
+                    <h3 className="font-semibold text-foreground">
+                        {item.nama_menu}
+                    </h3>
+                    <p className="text-xl font-bold text-primary">
+                        Rp {item.harga.toLocaleString('id-ID')}
+                    </p>
+                    <p className="text-sm text-muted-foreground">
+                        Stok: {item.stok}
+                    </p>
+                </div>
+                <div className="flex gap-2">
+                    <Button
+                        variant="outline"
+                        size="sm"
+                        className="flex-1"
+                        onClick={() => handleOpenEditDialog(item)}
+                    >
+                        <Edit className="mr-2 h-3 w-3" />
+                        Edit
+                    </Button>
+                    <Button
+                        variant="outline"
+                        size="sm"
+                        className="flex-1"
+                        onClick={() => {
+                            setSelectedMenu(item);
+                            setIsDeleteDialogOpen(true);
+                        }}
+                    >
+                        <Trash2 className="mr-2 h-3 w-3 text-destructive" />
+                        Hapus
+                    </Button>
                 </div>
             </CardContent>
         </Card>
@@ -166,11 +281,15 @@ export default function DaftarMenu() {
                                         className="pl-10 md:w-64"
                                     />
                                 </div>
+                                {/* ====================== */}
+                                {/* DIALOG TAMBAH MENU */}
+                                {/* ====================== */}
                                 <Dialog
                                     open={isDialogOpen}
                                     onOpenChange={(open) => {
                                         setIsDialogOpen(open);
                                         if (!open) {
+                                            resetCreateForm();
                                             setPreviewImage(null);
                                         }
                                     }}
@@ -181,13 +300,17 @@ export default function DaftarMenu() {
                                             Tambah Menu
                                         </Button>
                                     </DialogTrigger>
-                                    <DialogContent>
+                                    <DialogContent className="max-h-[90vh] overflow-y-auto">
                                         <DialogHeader>
                                             <DialogTitle>
                                                 Tambah Menu Baru
                                             </DialogTitle>
                                         </DialogHeader>
-                                        <div className="space-y-4">
+                                        <form
+                                            onSubmit={handleAddMenu}
+                                            className="space-y-4"
+                                        >
+                                            {/* Nama Menu */}
                                             <div className="space-y-2">
                                                 <Label htmlFor="menuName">
                                                     Nama Menu
@@ -195,17 +318,22 @@ export default function DaftarMenu() {
                                                 <Input
                                                     id="menuName"
                                                     placeholder="Masukkan nama menu"
+                                                    value={data.nama_menu}
+                                                    onChange={(e) =>
+                                                        setData(
+                                                            'nama_menu',
+                                                            e.target.value,
+                                                        )
+                                                    }
                                                 />
+                                                {errors.nama_menu && (
+                                                    <p className="text-sm text-destructive">
+                                                        {errors.nama_menu}
+                                                    </p>
+                                                )}
                                             </div>
-                                            <div className="space-y-2">
-                                                <Label htmlFor="description">
-                                                    Deskripsi
-                                                </Label>
-                                                <Textarea
-                                                    id="description"
-                                                    placeholder="Deskripsi menu (opsional)"
-                                                />
-                                            </div>
+
+                                            {/* Harga */}
                                             <div className="space-y-2">
                                                 <Label htmlFor="harga">
                                                     Harga
@@ -213,9 +341,23 @@ export default function DaftarMenu() {
                                                 <Input
                                                     id="harga"
                                                     type="number"
-                                                    placeholder="25000"
+                                                    placeholder="Masukkan harga (cth: 25000)"
+                                                    value={data.harga}
+                                                    onChange={(e) =>
+                                                        setData(
+                                                            'harga',
+                                                            e.target.value,
+                                                        )
+                                                    }
                                                 />
+                                                {errors.harga && (
+                                                    <p className="text-sm text-destructive">
+                                                        {errors.harga}
+                                                    </p>
+                                                )}
                                             </div>
+
+                                            {/* Stok */}
                                             <div className="space-y-2">
                                                 <Label htmlFor="stok">
                                                     Stok
@@ -223,30 +365,62 @@ export default function DaftarMenu() {
                                                 <Input
                                                     id="stok"
                                                     type="number"
-                                                    placeholder="0"
+                                                    placeholder="Masukkan jumlah stok (cth: 12)"
+                                                    value={data.stok}
+                                                    onChange={(e) =>
+                                                        setData(
+                                                            'stok',
+                                                            e.target.value,
+                                                        )
+                                                    }
                                                 />
+                                                {errors.stok && (
+                                                    <p className="text-sm text-destructive">
+                                                        {errors.stok}
+                                                    </p>
+                                                )}
                                             </div>
+
+                                            {/* Kategori */}
                                             <div className="space-y-2">
                                                 <Label htmlFor="kategori">
                                                     Kategori
                                                 </Label>
-                                                <Select>
+                                                <Select
+                                                    value={data.id_kategori}
+                                                    onValueChange={(value) =>
+                                                        setData(
+                                                            'id_kategori',
+                                                            value,
+                                                        )
+                                                    }
+                                                >
                                                     <SelectTrigger>
                                                         <SelectValue placeholder="Pilih kategori" />
                                                     </SelectTrigger>
                                                     <SelectContent>
-                                                        <SelectItem value="makanan">
-                                                            Makanan
-                                                        </SelectItem>
-                                                        <SelectItem value="minuman">
-                                                            Minuman
-                                                        </SelectItem>
-                                                        <SelectItem value="tambahan">
-                                                            Tambahan
-                                                        </SelectItem>
+                                                        {kategoris.map(
+                                                            (kat) => (
+                                                                <SelectItem
+                                                                    key={kat.id}
+                                                                    value={String(
+                                                                        kat.id,
+                                                                    )}
+                                                                >
+                                                                    {kat.nama}
+                                                                </SelectItem>
+                                                            ),
+                                                        )}
                                                     </SelectContent>
                                                 </Select>
+                                                {errors.id_kategori && (
+                                                    <p className="text-sm text-destructive">
+                                                        {errors.id_kategori}
+                                                    </p>
+                                                )}
                                             </div>
+
+                                            {/* Gambar */}
                                             <div className="space-y-2">
                                                 <Label htmlFor="image">
                                                     Gambar Menu
@@ -255,7 +429,9 @@ export default function DaftarMenu() {
                                                     id="image"
                                                     type="file"
                                                     accept="image/*"
-                                                    onChange={handleImageChange}
+                                                    onChange={(e) =>
+                                                        handleImageChange(e)
+                                                    }
                                                     className="cursor-pointer"
                                                 />
                                                 {previewImage && (
@@ -267,29 +443,36 @@ export default function DaftarMenu() {
                                                         />
                                                     </div>
                                                 )}
+                                                {errors.gambar && (
+                                                    <p className="text-sm text-destructive">
+                                                        {errors.gambar}
+                                                    </p>
+                                                )}
                                             </div>
+
+                                            {/* Tombol */}
                                             <div className="flex gap-2 pt-4">
                                                 <Button
+                                                    type="submit"
                                                     className="flex-1"
-                                                    onClick={() => {
-                                                        setIsDialogOpen(false);
-                                                        setPreviewImage(null);
-                                                    }}
+                                                    disabled={processing}
                                                 >
-                                                    Simpan
+                                                    {processing
+                                                        ? 'Menyimpan...'
+                                                        : 'Simpan'}
                                                 </Button>
                                                 <Button
+                                                    type="button"
                                                     variant="outline"
                                                     className="flex-1"
-                                                    onClick={() => {
-                                                        setIsDialogOpen(false);
-                                                        setPreviewImage(null);
-                                                    }}
+                                                    onClick={() =>
+                                                        setIsDialogOpen(false)
+                                                    }
                                                 >
                                                     Batal
                                                 </Button>
                                             </div>
-                                        </div>
+                                        </form>
                                     </DialogContent>
                                 </Dialog>
                             </div>
@@ -298,156 +481,157 @@ export default function DaftarMenu() {
                     <CardContent>
                         <Tabs defaultValue="makanan" className="w-full">
                             <TabsList className="grid w-full grid-cols-3">
-                                <TabsTrigger value="makanan">
-                                    Makanan
-                                </TabsTrigger>
-                                <TabsTrigger value="minuman">
-                                    Minuman
-                                </TabsTrigger>
-                                <TabsTrigger value="tambahan">
-                                    Tambahan
-                                </TabsTrigger>
+                                {/* Gunakan nama dari data kategori */}
+                                {kategoris.map((kat) => (
+                                    <TabsTrigger
+                                        key={kat.id}
+                                        value={kat.nama.toLowerCase()}
+                                    >
+                                        {kat.nama}
+                                    </TabsTrigger>
+                                ))}
                             </TabsList>
-                            <TabsContent value="makanan" className="mt-6">
-                                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                                    {filterItems('makanan').map((item) => (
-                                        <MenuCard key={item.id} item={item} />
-                                    ))}
-                                </div>
-                            </TabsContent>
-                            <TabsContent value="minuman" className="mt-6">
-                                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                                    {filterItems('minuman').map((item) => (
-                                        <MenuCard key={item.id} item={item} />
-                                    ))}
-                                </div>
-                            </TabsContent>
-                            <TabsContent value="tambahan" className="mt-6">
-                                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                                    {filterItems('tambahan').map((item) => (
-                                        <MenuCard key={item.id} item={item} />
-                                    ))}
-                                </div>
-                            </TabsContent>
+                            {/* Render content berdasarkan kategori */}
+                            {kategoris.map((kat) => (
+                                <TabsContent
+                                    key={kat.id}
+                                    value={kat.nama.toLowerCase()}
+                                    className="mt-6"
+                                >
+                                    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                                        {filterItems(
+                                            kat.nama.toLowerCase(),
+                                        ).map((item) => (
+                                            <MenuCard
+                                                key={item.id}
+                                                item={item}
+                                            />
+                                        ))}
+                                    </div>
+                                </TabsContent>
+                            ))}
                         </Tabs>
                     </CardContent>
                 </Card>
 
-                {/* Modal Edit */}
+                {/* ====================== */}
+                {/* DIALOG EDIT MENU */}
+                {/* ====================== */}
                 <Dialog
                     open={isEditDialogOpen}
                     onOpenChange={(open) => {
                         setIsEditDialogOpen(open);
                         if (!open) {
+                            resetEditForm();
                             setEditPreviewImage(null);
+                            setSelectedMenu(null);
                         }
                     }}
                 >
-                    <DialogContent>
+                    <DialogContent className="max-h-[90vh] overflow-y-auto">
                         <DialogHeader>
                             <DialogTitle>Edit Menu</DialogTitle>
                         </DialogHeader>
-                        <div className="space-y-4">
+                        <form onSubmit={handleEditMenu} className="space-y-4">
+                            {/* Nama Menu */}
                             <div className="space-y-2">
                                 <Label htmlFor="edit-name">Nama Menu</Label>
                                 <Input
                                     id="edit-name"
-                                    placeholder="Masukkan nama menu"
-                                    value={selectedMenu?.nama_menu}
+                                    placeholder="Masukkan harga (cth: 25000)"
+                                    value={editData.nama_menu}
                                     onChange={(e) =>
-                                        setSelectedMenu(
-                                            selectedMenu
-                                                ? {
-                                                      ...selectedMenu,
-                                                      nama_menu: e.target.value,
-                                                  }
-                                                : null,
-                                        )
+                                        setEditData('nama_menu', e.target.value)
                                     }
                                 />
+                                {editErrors.nama_menu && (
+                                    <p className="text-sm text-destructive">
+                                        {editErrors.nama_menu}
+                                    </p>
+                                )}
                             </div>
+
+                            {/* Harga */}
                             <div className="space-y-2">
                                 <Label htmlFor="edit-harga">Harga</Label>
                                 <Input
                                     id="edit-harga"
                                     type="number"
                                     placeholder="25000"
-                                    value={selectedMenu?.harga}
+                                    value={editData.harga}
                                     onChange={(e) =>
-                                        setSelectedMenu(
-                                            selectedMenu
-                                                ? {
-                                                      ...selectedMenu,
-                                                      harga: Number(
-                                                          e.target.value,
-                                                      ),
-                                                  }
-                                                : null,
-                                        )
+                                        setEditData('harga', e.target.value)
                                     }
                                 />
+                                {editErrors.harga && (
+                                    <p className="text-sm text-destructive">
+                                        {editErrors.harga}
+                                    </p>
+                                )}
                             </div>
+
+                            {/* Stok */}
                             <div className="space-y-2">
                                 <Label htmlFor="edit-stok">Stok</Label>
                                 <Input
                                     id="edit-stok"
                                     type="number"
-                                    placeholder="0"
-                                    value={selectedMenu?.stok}
+                                    placeholder="Masukkan jumlah stok (cth: 12)"
+                                    value={editData.stok}
                                     onChange={(e) =>
-                                        setSelectedMenu(
-                                            selectedMenu
-                                                ? {
-                                                      ...selectedMenu,
-                                                      stok: Number(
-                                                          e.target.value,
-                                                      ),
-                                                  }
-                                                : null,
-                                        )
+                                        setEditData('stok', e.target.value)
                                     }
                                 />
+                                {editErrors.stok && (
+                                    <p className="text-sm text-destructive">
+                                        {editErrors.stok}
+                                    </p>
+                                )}
                             </div>
+
+                            {/* Kategori */}
                             <div className="space-y-2">
                                 <Label htmlFor="edit-kategori">Kategori</Label>
                                 <Select
-                                    value={selectedMenu?.kategori?.nama}
+                                    value={editData.id_kategori}
                                     onValueChange={(value) =>
-                                        setSelectedMenu(
-                                            selectedMenu
-                                                ? {
-                                                      ...selectedMenu,
-                                                      kategori: {
-                                                          nama: value,
-                                                      } as Kategori,
-                                                  }
-                                                : null,
-                                        )
+                                        setEditData('id_kategori', value)
                                     }
                                 >
                                     <SelectTrigger>
                                         <SelectValue placeholder="Pilih kategori" />
                                     </SelectTrigger>
                                     <SelectContent>
-                                        <SelectItem value="makanan">
-                                            Makanan
-                                        </SelectItem>
-                                        <SelectItem value="minuman">
-                                            Minuman
-                                        </SelectItem>
-                                        <SelectItem value="tambahan">
-                                            Tambahan
-                                        </SelectItem>
+                                        {kategoris.map((kat) => (
+                                            <SelectItem
+                                                key={kat.id}
+                                                value={String(kat.id)}
+                                            >
+                                                {kat.nama}
+                                            </SelectItem>
+                                        ))}
                                     </SelectContent>
                                 </Select>
+                                {editErrors.id_kategori && (
+                                    <p className="text-sm text-destructive">
+                                        {editErrors.id_kategori}
+                                    </p>
+                                )}
                             </div>
+
+                            {/* Gambar */}
                             <div className="space-y-2">
-                                <Label htmlFor="edit-image">Gambar Menu</Label>
+                                <Label htmlFor="edit-image">
+                                    Ganti Gambar Menu (Opsional)
+                                </Label>
                                 <div className="mb-4 overflow-hidden rounded-md border">
                                     <img
                                         src={
-                                            editPreviewImage ||
-                                            selectedMenu?.gambar
+                                            editPreviewImage // Tampilkan preview jika ada, jika tidak, gambar lama
+                                                ? editPreviewImage
+                                                : selectedMenu
+                                                  ? `/storage/${selectedMenu.gambar}`
+                                                  : undefined
                                         }
                                         alt={selectedMenu?.nama_menu}
                                         className="aspect-video h-auto w-full object-cover"
@@ -460,34 +644,40 @@ export default function DaftarMenu() {
                                     onChange={(e) => handleImageChange(e, true)}
                                     className="cursor-pointer"
                                 />
+                                {editErrors.gambar && (
+                                    <p className="text-sm text-destructive">
+                                        {editErrors.gambar}
+                                    </p>
+                                )}
                             </div>
+
+                            {/* Tombol */}
                             <div className="flex gap-2 pt-4">
                                 <Button
+                                    type="submit"
                                     className="flex-1"
-                                    onClick={() => {
-                                        // Handle update logic here
-                                        setIsEditDialogOpen(false);
-                                        setEditPreviewImage(null);
-                                    }}
+                                    disabled={updateProcessing}
                                 >
-                                    Simpan
+                                    {updateProcessing
+                                        ? 'Menyimpan...'
+                                        : 'Simpan'}
                                 </Button>
                                 <Button
+                                    type="button"
                                     variant="outline"
                                     className="flex-1"
-                                    onClick={() => {
-                                        setIsEditDialogOpen(false);
-                                        setEditPreviewImage(null);
-                                    }}
+                                    onClick={() => setIsEditDialogOpen(false)}
                                 >
                                     Batal
                                 </Button>
                             </div>
-                        </div>
+                        </form>
                     </DialogContent>
                 </Dialog>
 
-                {/* Modal Delete */}
+                {/* ====================== */}
+                {/* DIALOG DELETE MENU */}
+                {/* ====================== */}
                 <Dialog
                     open={isDeleteDialogOpen}
                     onOpenChange={setIsDeleteDialogOpen}
@@ -502,16 +692,13 @@ export default function DaftarMenu() {
                                 <span className="font-semibold">
                                     {selectedMenu?.nama_menu}
                                 </span>
-                                ?
+                                ? Tindakan ini tidak dapat dibatalkan.
                             </p>
                             <div className="flex gap-2 pt-4">
                                 <Button
                                     variant="destructive"
                                     className="flex-1"
-                                    onClick={() => {
-                                        // Handle delete logic here
-                                        setIsDeleteDialogOpen(false);
-                                    }}
+                                    onClick={handleDeleteMenu}
                                 >
                                     Hapus
                                 </Button>

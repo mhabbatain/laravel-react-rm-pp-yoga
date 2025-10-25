@@ -11,11 +11,12 @@ import {
     TableRow,
 } from '@/components/ui/table';
 import AppLayout from '@/layouts/app-layout';
+import { formatDateTime } from '@/lib/utils';
 import daftarPesanan from '@/routes/daftar-pesanan';
 import { BreadcrumbItem, SharedData } from '@/types';
-import { Head, Link, usePage } from '@inertiajs/react';
+import { Head, Link, router, usePage } from '@inertiajs/react';
 import { Eye, Search } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -29,9 +30,10 @@ export default function DaftarPesanan() {
     const { pesanans } = usePage<SharedData>().props;
 
     const [searchQuery, setSearchQuery] = useState('');
-
-    // Centralized order data
-    // const orders = ordersData;
+    useEffect(() => {
+        // Paksa reload data dari server setiap kali halaman di-mount
+        router.reload({ only: ['pesanans'] });
+    }, []);
 
     const filteredOrders = pesanans?.filter((pesanan) => {
         const matchesSearch = pesanan.nomor_pesanan
@@ -86,9 +88,9 @@ export default function DaftarPesanan() {
                                 <TableRow>
                                     <TableHead>Nomor Pesanan</TableHead>
                                     <TableHead>Waktu</TableHead>
-                                    {/* <TableHead className="text-center">
+                                    <TableHead className="text-center">
                                         Item
-                                    </TableHead> */}
+                                    </TableHead>
                                     <TableHead className="text-right">
                                         Total
                                     </TableHead>
@@ -107,11 +109,14 @@ export default function DaftarPesanan() {
                                             {pesanan.nomor_pesanan}
                                         </TableCell>
                                         <TableCell className="text-muted-foreground">
-                                            {pesanan.created_at}
+                                            {formatDateTime(pesanan.created_at)}
                                         </TableCell>
-                                        {/* <TableCell className="text-center">
-                                            {pesanan.itemCount} item
-                                        </TableCell> */}
+                                        <TableCell className="text-center">
+                                            {pesanan.detail_pesanans?.length ||
+                                                0}{' '}
+                                            item
+                                        </TableCell>
+
                                         <TableCell className="text-right font-semibold">
                                             Rp{' '}
                                             {pesanan.total.toLocaleString(

@@ -1,6 +1,6 @@
 <?php
 
-use App\Http\Controllers\DetailPesananController;
+use App\Http\Controllers\BerandaController;
 use App\Http\Controllers\KaryawanController;
 use App\Http\Controllers\MenuController;
 use App\Http\Controllers\PesananController;
@@ -16,17 +16,15 @@ Route::get('/', function () {
 })->name('home');
 
 Route::middleware(['auth', 'verified'])->group(function () {
-    Route::get('beranda', function () {
-        return Inertia::render('beranda');
-    })->name('beranda');
+    Route::middleware(['admin'])->group(function () {
+        Route::get('beranda', [BerandaController::class, 'index'])->name('beranda');
+        Route::resource('karyawan', KaryawanController::class);
+        Route::resource('daftar-pesanan', PesananController::class);
+    });
+    Route::resource('pos', POSController::class);
+    Route::resource('daftar-menu', MenuController::class);
 });
 
-// Route::get('/pos', fn() => inertia('POS'))->name('pos');
-Route::resource('pos', POSController::class);
-Route::resource('karyawan', KaryawanController::class);
-// Route::resource('daftar-pesanan', DetailPesananController::class);
-Route::resource('daftar-pesanan', PesananController::class);
-Route::resource('daftar-menu', MenuController::class);
 
 
 
