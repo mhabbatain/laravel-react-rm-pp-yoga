@@ -7,7 +7,7 @@ import pos from '@/routes/pos';
 import { BreadcrumbItem, MenuItem, OrderItem, SharedData } from '@/types';
 import { Head, router, usePage } from '@inertiajs/react';
 import { Coffee, PlusCircle, UtensilsCrossed } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -25,12 +25,45 @@ const categoryIcons: Record<string, React.ElementType> = {
 
 export default function POS() {
     // DATA
-    const { kategoris, menuItems } = usePage<SharedData>().props;
+    const { kategoris, menuItems, flash, auth } = usePage<SharedData>().props;
+    const userId = auth.user?.id;
 
     const [orders, setOrders] = useState<OrderItem[]>([]);
     const [activeCategory, setActiveCategory] = useState<
         'makanan' | 'minuman' | 'tambahan'
     >('makanan');
+
+    useEffect(() => {
+        // Tampilkan toast sukses jika ada flash success
+        if (flash?.success) {
+            toast.success(flash.success, {
+                style: {
+                    // Style sukses (opsional, bisa disamakan)
+                    backgroundColor: '#dcfce7',
+                    color: '#166534',
+                    border: '1px solid #22c55e',
+                },
+                icon: '✅',
+            });
+        }
+
+        // Tampilkan toast error jika ada flash error (termasuk "Stok Habis")
+        if (flash?.error) {
+            toast.error(flash.error, {
+                // Pesan error diambil langsung dari backend
+                style: {
+                    // Style error (opsional, bisa disamakan)
+                    backgroundColor: '#fca5a5',
+                    color: '#991b1b',
+                    border: '1px solid #ef4444',
+                },
+                icon: '❌',
+            });
+        }
+        // Reset flash messages agar tidak muncul lagi saat navigasi (Inertia kadang menyimpannya)
+        // Ini mungkin tidak perlu tergantung setup Inertia Anda, tapi bisa membantu
+        // router.replace(window.location.pathname, { data: {}, replace: true, preserveState: true, preserveScroll: true });
+    }, [flash]); // Jalankan efek ini setiap kali objek flash berubah
 
     const handleSelectItem = (item: MenuItem) => {
         const existingOrder = orders.find((order) => order.id === item.id);
@@ -63,7 +96,13 @@ export default function POS() {
         const item = orders.find((order) => order.id === id);
         setOrders(orders.filter((order) => order.id !== id));
         if (item) {
-            toast.info(`${item.nama_menu} dihapus dari pesanan`);
+            toast.info(`${item.nama_menu} dihapus dari pesanan`, {
+                style: {
+                    backgroundColor: '#fca5a5',
+                    color: '#991b1b',
+                    border: '1px solid #ef4444',
+                },
+            });
         }
     };
 
@@ -85,7 +124,7 @@ export default function POS() {
 
         // Siapkan data untuk dikirim ke backend
         const payload = {
-            id_karyawan: 1, // sementara hardcode, bisa diganti user auth
+            id_karyawan: userId,
             meja: meja,
             metode_pembayaran: metodePembayaran,
             detail_pesanans: orders.map((item) => ({
@@ -99,12 +138,27 @@ export default function POS() {
             onSuccess: () => {
                 toast.success(
                     `Pesanan berhasil disimpan (Total Rp ${total.toLocaleString('id-ID')})`,
+                    {
+                        style: {
+                            backgroundColor: '#dcfce7',
+                            color: '#166534',
+                            border: '1px solid #22c55e',
+                        },
+                        icon: '✅',
+                    },
                 );
                 setOrders([]);
             },
             onError: (errors) => {
                 console.error(errors);
-                toast.error('Gagal menyimpan pesanan');
+                toast.error('Gagal menyimpan pesanan', {
+                    style: {
+                        backgroundColor: '#fca5a5',
+                        color: '#991b1b',
+                        border: '1px solid #ef4444',
+                    },
+                    icon: '❌',
+                });
             },
         });
     };

@@ -16,7 +16,7 @@ return new class extends Migration
             $table->foreignId("id_pesanan")->constrained('pesanans')->onDelete('cascade');
             $table->foreignId("id_menu")->constrained('menus')->onDelete('cascade');
             $table->integer("jumlah");
-            $table->decimal("subtotal");
+            $table->double("subtotal");
             $table->timestamps();
         });
     }

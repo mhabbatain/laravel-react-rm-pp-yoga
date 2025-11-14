@@ -33,8 +33,12 @@ export interface SharedData {
     karyawans: Karyawan[];
     pesanans?: Pesanan[];
     pesanan?: Pesanan;
-    stats?: Array<{ title: string; value: string }>; // <-- Tambahkan ini (opsional)
-    recentOrders?: Array<RecentOrderItem>; // <-- Tambahkan ini (opsional)
+    stats?: Array<{ title: string; value: string }>; 
+    recentOrders?: Array<RecentOrderItem>; 
+    flash?: {
+        success?: string; 
+        error?: string;
+    };
     [key: string]: unknown;
 }
 

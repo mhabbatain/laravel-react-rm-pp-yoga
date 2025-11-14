@@ -22,7 +22,14 @@ class DatabaseSeeder extends Seeder
                 'password' => 'admin123',
                 'email_verified_at' => now(),
                 'role' => 'admin',
-            ]
+            ],
+            // ['email' => 'admin@gmail.com'],
+            // [
+            //     'name' => 'admin',
+            //     'password' => 'admin123',
+            //     'email_verified_at' => now(),
+            //     'role' => 'admin',
+            // ]
         );
 
         $this->call([

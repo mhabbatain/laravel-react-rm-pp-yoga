@@ -33,7 +33,7 @@ export default function MenuCard({
                 <h3 className="mb-2 text-lg font-semibold text-foreground">
                     {item.nama_menu}
                 </h3>
-                <div className="flex items-center justify-between">
+                <div className="flex items-center justify-between mb-2">
                     <span className="text-xl font-bold text-primary">
                         Rp {item.harga.toLocaleString('id-ID')}
                     </span>
@@ -54,6 +54,9 @@ export default function MenuCard({
                         )}
                     </Button>
                 </div>
+                <p className="text-sm text-muted-foreground">
+                    Stok: {item.stok}
+                </p>
             </div>
         </Card>
     );

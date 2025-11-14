@@ -23,6 +23,8 @@ class CheckAdminRole
             return redirect()->route('pos.index')->with('error', 'Anda tidak memiliki akses ke halaman ini.');
         }
 
+        // dd('Anda adalah admin. Role:', Auth::user()->role);
+
         // Jika admin, lanjutkan request
         return $next($request);
     }

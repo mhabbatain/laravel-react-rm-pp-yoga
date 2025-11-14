@@ -73,10 +73,15 @@ export default function OrderPanel({
                                         <h3 className="mb-1 truncate font-semibold text-foreground">
                                             {item.nama_menu}
                                         </h3>
-                                        <p className="text-sm font-medium text-primary">
+                                        <p className="text-sm font-medium text-primary mb-1">
                                             Rp{' '}
                                             {item.harga.toLocaleString('id-ID')}
                                         </p>
+                                        {item.quantity >= item.stok && (
+                                            <p className="text-sm text-destructive">
+                                                Stok Maksimum
+                                            </p>
+                                        )}
                                     </div>
 
                                     <Button
@@ -94,7 +99,8 @@ export default function OrderPanel({
                                         <Button
                                             size="icon"
                                             variant="outline"
-                                            className="h-8 w-8 rounded-full"
+                                            className="h-8 w-8 rounded-full disabled:cursor-not-allowed"
+                                            disabled={item.quantity == 1}
                                             onClick={() =>
                                                 onUpdateQuantity(
                                                     item.id,
@@ -115,7 +121,10 @@ export default function OrderPanel({
                                         <Button
                                             size="icon"
                                             variant="outline"
-                                            className="h-8 w-8 rounded-full"
+                                            className="h-8 w-8 rounded-full disabled:cursor-not-allowed"
+                                            disabled={
+                                                item.quantity >= item.stok
+                                            }
                                             onClick={() =>
                                                 onUpdateQuantity(
                                                     item.id,
@@ -141,9 +150,9 @@ export default function OrderPanel({
             </ScrollArea>
 
             {orders.length > 0 && (
-                <>
+                <div className="absolute right-9 bottom-16 z-50 w-[440px]">
                     <Separator />
-                    <div className="space-y-4 bg-linear-to-br from-primary/5 to-transparent p-6">
+                    <div className="space-y-4 bg-white p-4">
                         <div className="flex items-center justify-between text-2xl font-bold">
                             <span className="text-foreground">Total</span>
                             <span className="text-primary">
@@ -228,7 +237,7 @@ export default function OrderPanel({
                             </Button>
                         </div>
                     </div>
-                </>
+                </div>
             )}
         </Card>
     );
