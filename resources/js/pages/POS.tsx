@@ -124,7 +124,7 @@ export default function POS() {
 
         // Siapkan data untuk dikirim ke backend
         const payload = {
-            id_karyawan: userId,
+            id_user: userId,
             meja: meja,
             metode_pembayaran: metodePembayaran,
             detail_pesanans: orders.map((item) => ({

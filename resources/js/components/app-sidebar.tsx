@@ -54,7 +54,7 @@ const mainNavItems: NavItem[] = [
         title: 'Daftar Menu',
         href: daftarMenu.index(),
         icon: Utensils,
-        isAdminOnly: false,
+        isAdminOnly: true,
     },
 ];
 
@@ -75,13 +75,18 @@ export function AppSidebar() {
         // Admin sees everything
         if (userRole === 'admin') return true;
 
-        // Karyawan should only see POS and Daftar Pesanan (detail)
-        if (userRole === 'karyawan') {
-            return item.title === 'POS' || item.title === 'Daftar Pesanan';
+        // Kasir hanya bisa lihat POS
+        if (userRole === 'kasir') {
+            return item.title === 'POS';
         }
 
-        // Default: hide
-        return false;
+        // Karyawan biasa bisa lihat POS
+        if (userRole === 'karyawan') {
+            return item.title === 'POS';
+        }
+
+        // Default: hide admin-only items
+        return !item.isAdminOnly;
     });
     return (
         <Sidebar collapsible="icon" variant="inset">

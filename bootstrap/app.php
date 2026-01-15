@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Middleware\CheckAdminRole;
+use App\Http\Middleware\CheckKasirRole;
 use App\Http\Middleware\HandleAppearance;
 use App\Http\Middleware\HandleInertiaRequests;
 use Illuminate\Foundation\Application;
@@ -25,7 +26,7 @@ return Application::configure(basePath: dirname(__DIR__))
 
         $middleware->alias([
             'admin' => CheckAdminRole::class,
-            // Add other aliases if needed
+            'kasir' => CheckKasirRole::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {

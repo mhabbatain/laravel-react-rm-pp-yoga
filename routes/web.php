@@ -16,25 +16,24 @@ Route::get('/', function () {
     ]);
 })->name('home');
 
-Route::middleware(['auth', 'verified'])->group(function () {
+Route::middleware(['auth', 'verified', 'kasir'])->group(function () {
+    // Halaman khusus admin
     Route::middleware(['admin'])->group(function () {
         Route::get('beranda', [BerandaController::class, 'index'])->name('beranda');
         Route::resource('karyawan', KaryawanController::class);
         Route::resource('daftar-pesanan', PesananController::class);
+        Route::resource('daftar-menu', MenuController::class);
+        
+        // AI Chat endpoint (backend proxy ke Gemini/OpenAI-like API)
+        Route::post('/ai/chat', [AiController::class, 'chat'])->name('ai.chat');
+        Route::get('/ai-chat', function () {
+            return Inertia::render('ai-chat');
+        })->name('ai.chat.page');
     });
+    
+    // Halaman POS - bisa diakses admin dan kasir
     Route::resource('pos', POSController::class);
-    Route::resource('daftar-menu', MenuController::class);
-
-    // AI Chat endpoint (backend proxy ke Gemini/OpenAI-like API)
-    Route::post('/ai/chat', [AiController::class, 'chat'])->name('ai.chat');
-
-    // Halaman Inertia untuk AI Chat (GET) - tampilkan UI chat
-    Route::get('/ai-chat', function () {
-        return Inertia::render('ai-chat');
-    })->name('ai.chat.page');
 });
-
-
 
 
 require __DIR__ . '/settings.php';

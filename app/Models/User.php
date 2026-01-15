@@ -50,4 +50,28 @@ class User extends Authenticatable
             'two_factor_confirmed_at' => 'datetime',
         ];
     }
+
+    /**
+     * Get the karyawan associated with the user.
+     */
+    public function karyawan()
+    {
+        return $this->hasOne(Karyawan::class, 'user_id');
+    }
+
+    /**
+     * Check if the user is admin
+     */
+    public function isAdmin(): bool
+    {
+        return $this->role === 'admin';
+    }
+
+    /**
+     * Check if the user is kasir
+     */
+    public function isKasir(): bool
+    {
+        return $this->role === 'kasir';
+    }
 }

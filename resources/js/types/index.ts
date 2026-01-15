@@ -33,6 +33,7 @@ export interface SharedData {
     karyawans: Karyawan[];
     pesanans?: Pesanan[];
     pesanan?: Pesanan;
+    currentFilter?: string;
     stats?: Array<{ title: string; value: string }>;
     recentOrders?: Array<RecentOrderItem>;
     flash?: {
@@ -46,7 +47,7 @@ export interface User {
     id: number;
     name: string;
     email: string;
-    role: 'admin' | 'karyawan';
+    role: 'admin' | 'karyawan' | 'kasir';
     avatar?: string;
     email_verified_at: string | null;
     two_factor_enabled?: boolean;

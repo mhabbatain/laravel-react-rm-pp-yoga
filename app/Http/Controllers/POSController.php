@@ -41,7 +41,7 @@ class POSController extends Controller
     {
         // Validasi data dasar dari frontend
         $validated = $request->validate([
-            // 'id_karyawan' => 'required|exists:karyawans,id',
+            'id_user' => 'required|exists:users,id',
             'meja' => 'required|in:1,2,3,4,5,6,7',
             'metode_pembayaran' => 'required|in:tunai,qris',
             'detail_pesanans' => 'required|array|min:1',
@@ -91,7 +91,7 @@ class POSController extends Controller
 
             // 3. Simpan pesanan utama
             $pesanan = Pesanan::create([
-                // 'id_karyawan' => $validated['id_karyawan'],
+                'id_user' => $validated['id_user'],
                 'nomor_pesanan' => $nomorPesanan,
                 'meja' => $validated['meja'],
                 'waktu' => now(),

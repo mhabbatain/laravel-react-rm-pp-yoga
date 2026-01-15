@@ -3,6 +3,13 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from '@/components/ui/select';
+import {
     Table,
     TableBody,
     TableCell,
@@ -15,8 +22,8 @@ import { formatDateTime } from '@/lib/utils';
 import daftarPesanan from '@/routes/daftar-pesanan';
 import { BreadcrumbItem, SharedData } from '@/types';
 import { Head, Link, router, usePage } from '@inertiajs/react';
-import { Eye, Search } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { Calendar, Eye, Search } from 'lucide-react';
+import { useState } from 'react';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -25,15 +32,36 @@ const breadcrumbs: BreadcrumbItem[] = [
     },
 ];
 
+type FilterPeriode = 'semua' | 'harian' | 'mingguan' | 'bulanan' | 'tahunan';
+
+const filterOptions: { value: FilterPeriode; label: string }[] = [
+    { value: 'semua', label: 'Semua Waktu' },
+    { value: 'harian', label: 'Hari Ini' },
+    { value: 'mingguan', label: 'Minggu Ini' },
+    { value: 'bulanan', label: 'Bulan Ini' },
+    { value: 'tahunan', label: 'Tahun Ini' },
+];
+
 export default function DaftarPesanan() {
     // DATA
-    const { pesanans } = usePage<SharedData>().props;
+    const { pesanans, currentFilter } = usePage<SharedData>().props;
 
     const [searchQuery, setSearchQuery] = useState('');
-    useEffect(() => {
-        // Paksa reload data dari server setiap kali halaman di-mount
-        router.reload({ only: ['pesanans'] });
-    }, []);
+    const [selectedFilter, setSelectedFilter] = useState<FilterPeriode>(
+        (currentFilter as FilterPeriode) || 'semua',
+    );
+
+    const handleFilterChange = (value: FilterPeriode) => {
+        setSelectedFilter(value);
+        router.get(
+            '/daftar-pesanan',
+            { filter: value },
+            {
+                preserveState: true,
+                preserveScroll: true,
+            },
+        );
+    };
 
     const filteredOrders = pesanans?.filter((pesanan) => {
         const matchesSearch = pesanan.nomor_pesanan
@@ -41,6 +69,11 @@ export default function DaftarPesanan() {
             .includes(searchQuery.toLowerCase());
         return matchesSearch;
     });
+
+    // Hitung total pendapatan dari pesanan yang difilter
+    const totalPendapatan =
+        filteredOrders?.reduce((sum, pesanan) => sum + pesanan.total, 0) || 0;
+
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Daftar Pesanan" />
@@ -70,6 +103,31 @@ export default function DaftarPesanan() {
                                     }
                                     className="pl-10"
                                 />
+                            </div>
+                            <div className="flex items-center gap-2">
+                                <Calendar className="h-4 w-4 text-muted-foreground" />
+                                <Select
+                                    value={selectedFilter}
+                                    onValueChange={(value) =>
+                                        handleFilterChange(
+                                            value as FilterPeriode,
+                                        )
+                                    }
+                                >
+                                    <SelectTrigger className="w-[180px]">
+                                        <SelectValue placeholder="Pilih periode" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {filterOptions.map((option) => (
+                                            <SelectItem
+                                                key={option.value}
+                                                value={option.value}
+                                            >
+                                                {option.label}
+                                            </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
                             </div>
                         </div>
                     </CardContent>
