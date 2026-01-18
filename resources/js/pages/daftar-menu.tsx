@@ -480,7 +480,7 @@ export default function DaftarMenu() {
                     </CardHeader>
                     <CardContent>
                         <Tabs defaultValue="makanan" className="w-full">
-                            <TabsList className="grid w-full grid-cols-3">
+                            <TabsList className="grid w-full grid-cols-2 md:grid-cols-3">
                                 {/* Gunakan nama dari data kategori */}
                                 {kategoris.map((kat) => (
                                     <TabsTrigger
@@ -498,7 +498,7 @@ export default function DaftarMenu() {
                                     value={kat.nama.toLowerCase()}
                                     className="mt-6"
                                 >
-                                    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3">
                                         {filterItems(
                                             kat.nama.toLowerCase(),
                                         ).map((item) => (

@@ -200,9 +200,9 @@ export default function POS() {
                 </div>
 
                 <div className="container mx-auto">
-                    <div className="grid h-[calc(100vh-140px)] grid-cols-1 gap-6 lg:grid-cols-3">
+                    <div className="grid h-[calc(100vh-140px)] grid-cols-1 gap-6 md:grid-cols-3">
                         {/* Menu Section */}
-                        <div className="flex flex-col lg:col-span-2">
+                        <div className="flex flex-col md:col-span-2">
                             <Tabs
                                 value={activeCategory}
                                 onValueChange={(v) =>
@@ -266,7 +266,7 @@ export default function POS() {
                         </div>
 
                         {/* Order Panel */}
-                        <div className="lg:col-span-1">
+                        <div className="md:col-span-1">
                             <OrderPanel
                                 orders={orders}
                                 onUpdateQuantity={handleUpdateQuantity}
