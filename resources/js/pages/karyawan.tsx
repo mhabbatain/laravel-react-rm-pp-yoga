@@ -101,8 +101,14 @@ export default function Karyawan() {
                     icon: '✅',
                 });
             },
-            onError: () => {
-                toast.error('Gagal menambahkan karyawan!', {
+            onError: (errors: Record<string, string>) => {
+                const errorMessages = Object.values(errors);
+                const errorMessage =
+                    errorMessages.length > 0
+                        ? errorMessages[0]
+                        : 'Gagal menambahkan karyawan!';
+
+                toast.error(errorMessage, {
                     style: {
                         backgroundColor: '#fee2e2',
                         color: '#991b1b',
