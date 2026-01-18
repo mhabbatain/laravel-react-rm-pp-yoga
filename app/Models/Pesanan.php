@@ -11,6 +11,7 @@ class Pesanan extends Model
     use HasFactory;
 
     protected $fillable = [
+        'id_karyawan',
         'id_user',
         'nomor_pesanan',
         'meja',
@@ -18,6 +19,11 @@ class Pesanan extends Model
         'total',
         'metode_pembayaran',
     ];
+
+    public function karyawan()
+    {
+        return $this->belongsTo(Karyawan::class, 'id_karyawan');
+    }
 
     public function user()
     {

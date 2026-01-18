@@ -26,7 +26,9 @@ const categoryIcons: Record<string, React.ElementType> = {
 export default function POS() {
     // DATA
     const { kategoris, menuItems, flash, auth } = usePage<SharedData>().props;
+    const karyawanId = auth.user?.karyawan?.id;
     const userId = auth.user?.id;
+    const isAdmin = auth.user?.role === 'admin';
 
     const [orders, setOrders] = useState<OrderItem[]>([]);
     const [activeCategory, setActiveCategory] = useState<
@@ -117,6 +119,22 @@ export default function POS() {
             return;
         }
 
+        // Admin bisa tanpa karyawan, tapi karyawan harus punya id_karyawan
+        if (!isAdmin && !karyawanId) {
+            toast.error(
+                'Akun Anda tidak terhubung dengan data karyawan. Hubungi admin.',
+                {
+                    style: {
+                        backgroundColor: '#fca5a5',
+                        color: '#991b1b',
+                        border: '1px solid #ef4444',
+                    },
+                    icon: '❌',
+                },
+            );
+            return;
+        }
+
         const total = orders.reduce(
             (sum, item) => sum + item.harga * item.quantity,
             0,
@@ -124,7 +142,8 @@ export default function POS() {
 
         // Siapkan data untuk dikirim ke backend
         const payload = {
-            id_user: userId,
+            id_karyawan: karyawanId || null,
+            id_user: isAdmin ? userId : null,
             meja: meja,
             metode_pembayaran: metodePembayaran,
             detail_pesanans: orders.map((item) => ({

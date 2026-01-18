@@ -41,7 +41,8 @@ class POSController extends Controller
     {
         // Validasi data dasar dari frontend
         $validated = $request->validate([
-            'id_user' => 'required|exists:users,id',
+            'id_karyawan' => 'nullable|exists:karyawans,id',
+            'id_user' => 'nullable|exists:users,id',
             'meja' => 'required|in:1,2,3,4,5,6,7',
             'metode_pembayaran' => 'required|in:tunai,qris',
             'detail_pesanans' => 'required|array|min:1',
@@ -50,6 +51,11 @@ class POSController extends Controller
             // Hapus validasi subtotal dari sini, hitung ulang di backend
             // 'detail_pesanans.*.subtotal' => 'required|numeric|min:0',
         ]);
+
+        // Validasi: minimal salah satu harus ada (id_karyawan atau id_user)
+        if (empty($validated['id_karyawan']) && empty($validated['id_user'])) {
+            return back()->withInput()->with('error', 'ID Karyawan atau ID User harus diisi.');
+        }
 
         // Mulai database transaction
         try {
@@ -91,7 +97,8 @@ class POSController extends Controller
 
             // 3. Simpan pesanan utama
             $pesanan = Pesanan::create([
-                'id_user' => $validated['id_user'],
+                'id_karyawan' => $validated['id_karyawan'] ?? null,
+                'id_user' => $validated['id_user'] ?? null,
                 'nomor_pesanan' => $nomorPesanan,
                 'meja' => $validated['meja'],
                 'waktu' => now(),
