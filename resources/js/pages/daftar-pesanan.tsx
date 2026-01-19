@@ -142,65 +142,63 @@ export default function DaftarPesanan() {
                     </CardHeader>
                     <CardContent>
                         <div className="overflow-auto">
-                            <Table>
-                                <TableHeader>
-                                    <TableRow>
-                                        <TableHead>Nomor Pesanan</TableHead>
-                                        <TableHead>Waktu</TableHead>
-                                        <TableHead className="text-center">
-                                            Item
-                                        </TableHead>
-                                        <TableHead className="text-right">
-                                            Total
-                                        </TableHead>
-                                        <TableHead className="text-center">
-                                            Aksi
-                                        </TableHead>
-                                    </TableRow>
-                                </TableHeader>
-                                <TableBody>
-                                    {filteredOrders?.map((pesanan) => (
-                                        <TableRow
-                                            key={pesanan.id}
-                                            className="cursor-pointer hover:bg-muted/50"
-                                        >
-                                            <TableCell className="font-medium">
-                                                {pesanan.nomor_pesanan}
-                                            </TableCell>
-                                            <TableCell className="text-muted-foreground">
-                                                {formatDateTime(
-                                                    pesanan.created_at,
-                                                )}
-                                            </TableCell>
-                                            <TableCell className="text-center">
-                                                {pesanan.detail_pesanans
-                                                    ?.length || 0}{' '}
-                                                item
-                                            </TableCell>
+                        <Table>
+                            <TableHeader>
+                                <TableRow>
+                                    <TableHead>Nomor Pesanan</TableHead>
+                                    <TableHead>Waktu</TableHead>
+                                    <TableHead className="text-center">
+                                        Item
+                                    </TableHead>
+                                    <TableHead className="text-right">
+                                        Total
+                                    </TableHead>
+                                    <TableHead className="text-center">
+                                        Aksi
+                                    </TableHead>
+                                </TableRow>
+                            </TableHeader>
+                            <TableBody>
+                                {filteredOrders?.map((pesanan) => (
+                                    <TableRow
+                                        key={pesanan.id}
+                                        className="cursor-pointer hover:bg-muted/50"
+                                    >
+                                        <TableCell className="font-medium">
+                                            {pesanan.nomor_pesanan}
+                                        </TableCell>
+                                        <TableCell className="text-muted-foreground">
+                                            {formatDateTime(pesanan.created_at)}
+                                        </TableCell>
+                                        <TableCell className="text-center">
+                                            {pesanan.detail_pesanans?.length ||
+                                                0}{' '}
+                                            item
+                                        </TableCell>
 
-                                            <TableCell className="text-right font-semibold">
-                                                Rp{' '}
-                                                {pesanan.total.toLocaleString(
-                                                    'id-ID',
-                                                )}
-                                            </TableCell>
-                                            <TableCell className="text-center">
-                                                <Link
-                                                    href={`/daftar-pesanan/${pesanan.id}`}
+                                        <TableCell className="text-right font-semibold">
+                                            Rp{' '}
+                                            {pesanan.total.toLocaleString(
+                                                'id-ID',
+                                            )}
+                                        </TableCell>
+                                        <TableCell className="text-center">
+                                            <Link
+                                                href={`/daftar-pesanan/${pesanan.id}`}
+                                            >
+                                                <Button
+                                                    variant="outline"
+                                                    size="sm"
                                                 >
-                                                    <Button
-                                                        variant="outline"
-                                                        size="sm"
-                                                    >
-                                                        <Eye className="mr-2 h-4 w-4" />
-                                                        Detail
-                                                    </Button>
-                                                </Link>{' '}
-                                            </TableCell>
-                                        </TableRow>
-                                    ))}
-                                </TableBody>
-                            </Table>
+                                                    <Eye className="mr-2 h-4 w-4" />
+                                                    Detail
+                                                </Button>
+                                            </Link>{' '}
+                                        </TableCell>
+                                    </TableRow>
+                                ))}
+                            </TableBody>
+                        </Table>
                         </div>
                         {filteredOrders?.length === 0 && (
                             <div className="py-12 text-center text-muted-foreground">

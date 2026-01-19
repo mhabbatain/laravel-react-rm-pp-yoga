@@ -34,6 +34,7 @@ export default function OrderPanel({
     const [selectedTable, setSelectedTable] = useState('1');
     const [showPaymentPanel, setShowPaymentPanel] = useState(false);
     const [amountGiven, setAmountGiven] = useState<number | ''>('');
+    const [exactCash, setExactCash] = useState(false);
 
     const total = orders.reduce(
         (sum, item) => sum + item.harga * item.quantity,
@@ -241,29 +242,37 @@ export default function OrderPanel({
             )}
 
             {showPaymentPanel && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-                    <Card className="w-[420px] p-4">
-                        <h3 className="text-lg font-bold">
-                            Pembayaran
-                        </h3>
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+                    <Card className="w-full max-w-md rounded-lg p-4 shadow-2xl">
+                        <div className="mb-3 flex items-center justify-between">
+                            <h3 className="text-lg font-bold">Pembayaran</h3>
+                            <span className="text-sm text-muted-foreground">
+                                Pastikan jumlah sesuai sebelum konfirmasi
+                            </span>
+                        </div>
 
-                        <div className="mt-4 space-y-3">
+                        <div className="mb-4 rounded-md bg-muted/10 p-3">
                             <div className="flex items-center justify-between">
                                 <span className="text-sm text-muted-foreground">
                                     Total
                                 </span>
-                                <span className="font-semibold">
-                                    Rp {total.toLocaleString('id-ID')}
-                                </span>
+                                <div className="rounded-md bg-primary/5 px-3 py-1">
+                                    <span className="text-lg font-semibold text-primary">
+                                        Rp {total.toLocaleString('id-ID')}
+                                    </span>
+                                </div>
                             </div>
+                        </div>
 
+                        <div className="space-y-4">
                             <div>
                                 <label
                                     htmlFor="amount_given"
-                                    className="mb-1 block text-sm"
+                                    className="mb-1 block text-sm font-medium"
                                 >
                                     Jumlah Yang Dibayarkan
                                 </label>
+
                                 <input
                                     id="amount_given"
                                     name="amount_given"
@@ -272,18 +281,59 @@ export default function OrderPanel({
                                     step={1000}
                                     placeholder="0"
                                     title="Jumlah uang yang diberikan oleh pelanggan"
-                                    className="w-full rounded border p-2"
+                                    className="w-full rounded-md border p-2 focus:border-primary focus:ring-primary/40"
                                     value={
                                         amountGiven === '' ? '' : amountGiven
                                     }
-                                    onChange={(e) =>
+                                    disabled={exactCash}
+                                    onChange={(e) => {
+                                        setExactCash(false);
                                         setAmountGiven(
                                             e.target.value === ''
                                                 ? ''
                                                 : Number(e.target.value),
-                                        )
-                                    }
+                                        );
+                                    }}
                                 />
+
+                                <div className="mb-2 flex items-center gap-3">
+                                    <input
+                                        id="exact_cash"
+                                        type="checkbox"
+                                        checked={exactCash}
+                                        onChange={(e) => {
+                                            const checked = e.target.checked;
+                                            setExactCash(checked);
+                                            if (checked) setAmountGiven(total);
+                                        }}
+                                        className="h-4 w-4"
+                                    />
+                                    <label
+                                        htmlFor="exact_cash"
+                                        className="text-sm"
+                                    >
+                                        Uang Pas (tepat)
+                                    </label>
+                                </div>
+                                
+                                {/* Quick amount buttons */}
+                                <div className="mt-3 grid grid-cols-3 gap-2">
+                                    {[5000, 10000, 20000, 50000, 100000].map(
+                                        (amt) => (
+                                            <button
+                                                key={amt}
+                                                type="button"
+                                                className="flex items-center justify-center rounded-md border bg-white px-3 py-2 text-sm font-medium hover:bg-primary/5"
+                                                onClick={() => {
+                                                    setExactCash(false);
+                                                    setAmountGiven(amt);
+                                                }}
+                                            >
+                                                Rp {amt.toLocaleString('id-ID')}
+                                            </button>
+                                        ),
+                                    )}
+                                </div>
                             </div>
 
                             <div className="flex items-center justify-between">
@@ -302,22 +352,26 @@ export default function OrderPanel({
                             </div>
                         </div>
 
-                        <div className="mt-4 flex justify-end gap-2">
+                        <div className="mt-4 flex items-center justify-end gap-3">
                             <Button
                                 variant="outline"
+                                className="px-4"
                                 onClick={() => {
                                     setShowPaymentPanel(false);
                                     setAmountGiven('');
+                                    setExactCash(false);
                                 }}
                             >
                                 Batal
                             </Button>
 
                             <Button
+                                className="bg-primary px-4 text-primary-foreground"
                                 onClick={() => {
                                     onPay(selectedTable, selectedPayment);
                                     setShowPaymentPanel(false);
                                     setAmountGiven('');
+                                    setExactCash(false);
                                 }}
                                 disabled={
                                     selectedPayment === 'tunai' &&
