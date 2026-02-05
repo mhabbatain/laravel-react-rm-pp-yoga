@@ -18,41 +18,23 @@ class KaryawanSeeder extends Seeder
         $employees = [
             [
                 'nama' => 'Ahmad Fauzi',
-                'jabatan' => 'kasir',
+                'role' => 'kasir',
                 'no_telepon' => '081234567890',
                 'email' => 'kasir@gmail.com', // Email untuk login
             ],
             [
-                'nama' => 'Siti Nurhaliza',
-                'jabatan' => 'pelayan',
-                'no_telepon' => '081234567891',
-                'email' => null,
+                'nama' => 'Yoga',
+                'role' => 'kasir',
+                'no_telepon' => '081234533391',
+                'email' => 'yoga@gmail.com', // Email untuk login
             ],
-            [
-                'nama' => 'Budi Hartono',
-                'jabatan' => 'koki',
-                'no_telepon' => '081234567892',
-                'email' => null,
-            ],
-            [
-                'nama' => 'Rina Wijaya',
-                'jabatan' => 'manajer',
-                'no_telepon' => '081234567893',
-                'email' => null,
-            ],
-            [
-                'nama' => 'Dedi Susanto',
-                'jabatan' => 'pelayan',
-                'no_telepon' => '081234567894',
-                'email' => null,
-            ],
+            // Removed other roles as requested: "role nya hanya satu yaitu kasir"
         ];
 
         foreach ($employees as $employee) {
             $userId = null;
-            
-            // Jika karyawan adalah kasir, buat user untuk login
-            if ($employee['jabatan'] === 'kasir' && $employee['email']) {
+                
+            if ($employee['email']) {
                 $user = User::firstOrCreate(
                     ['email' => $employee['email']],
                     [
@@ -69,7 +51,7 @@ class KaryawanSeeder extends Seeder
                 ['no_telepon' => $employee['no_telepon']],
                 [
                     'nama' => $employee['nama'],
-                    'jabatan' => $employee['jabatan'],
+                    'role' => $employee['role'],
                     'no_telepon' => $employee['no_telepon'],
                     'user_id' => $userId,
                 ]

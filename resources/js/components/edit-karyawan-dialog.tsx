@@ -8,24 +8,19 @@ import {
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Label } from './ui/label';
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from './ui/select';
 
 export interface EditKaryawanDialogProps {
     isEditDialogOpen: boolean;
     setIsEditDialogOpen: (open: boolean) => void;
     formData: {
         nama: string;
-        jabatan: 'kasir' | 'pelayan' | 'koki' | 'manajer';
+        role: string;
         no_telepon: string;
+        email?: string;
+        password?: string;
     };
     handleChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
-    handleSelectChange: (field: 'jabatan', value: string) => void;
+    handleSelectChange: (field: 'role', value: string) => void;
     handleEditKaryawan: (e: React.FormEvent<HTMLFormElement>) => void;
 }
 
@@ -61,26 +56,8 @@ export default function EditKaryawanDialog({
                         />
                     </div>
 
-                    {/* Jabatan */}
-                    <div className="space-y-2">
-                        <Label htmlFor="edit-jabatan">Jabatan</Label>
-                        <Select
-                            value={formData.jabatan}
-                            onValueChange={(value) =>
-                                handleSelectChange('jabatan', value)
-                            }
-                        >
-                            <SelectTrigger id="edit-jabatan">
-                                <SelectValue placeholder="Pilih jabatan" />
-                            </SelectTrigger>
-                            <SelectContent>
-                                <SelectItem value="kasir">Kasir</SelectItem>
-                                <SelectItem value="pelayan">Pelayan</SelectItem>
-                                <SelectItem value="koki">Koki</SelectItem>
-                                <SelectItem value="manajer">Manajer</SelectItem>
-                            </SelectContent>
-                        </Select>
-                    </div>
+                    {/* Role (Hidden) */}
+                    <input type="hidden" name="role" value="kasir" />
 
                     {/* Nomor Telepon */}
                     <div className="space-y-2">
@@ -92,6 +69,35 @@ export default function EditKaryawanDialog({
                             value={formData.no_telepon}
                             onChange={handleChange}
                             required
+                        />
+                    </div>
+
+                    {/* Email */}
+                    <div className="space-y-2">
+                        <Label htmlFor="edit-email">Email</Label>
+                        <Input
+                            id="edit-email"
+                            name="email"
+                            type="email"
+                            placeholder="Masukkan email"
+                            value={formData.email}
+                            onChange={handleChange}
+                            required
+                        />
+                    </div>
+
+                    {/* Password */}
+                    <div className="space-y-2">
+                        <Label htmlFor="edit-password">
+                            Password (Kosongkan jika tidak ingin mengubah)
+                        </Label>
+                        <Input
+                            id="edit-password"
+                            name="password"
+                            type="password"
+                            placeholder="Masukkan password baru"
+                            value={formData.password}
+                            onChange={handleChange}
                         />
                     </div>
 

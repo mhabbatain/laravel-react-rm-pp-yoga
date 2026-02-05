@@ -1,6 +1,5 @@
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
 import { OrderItem } from '@/types';
 import { CreditCard, Minus, Plus, RotateCcw, Trash2 } from 'lucide-react';
@@ -34,16 +33,15 @@ export default function OrderPanel({
     const [selectedTable, setSelectedTable] = useState('1');
     const [showPaymentPanel, setShowPaymentPanel] = useState(false);
     const [amountGiven, setAmountGiven] = useState<number | ''>('');
-    const [exactCash, setExactCash] = useState(false);
 
     const total = orders.reduce(
         (sum, item) => sum + item.harga * item.quantity,
         0,
     );
     return (
-        <Card className="flex h-full flex-col shadow-lg">
-            <div className="border-b bg-linear-to-br from-primary/5 to-transparent p-6">
-                <h2 className="text-2xl font-bold text-foreground">
+        <Card className="flex h-[calc(100vh-12rem)] md:h-[calc(100vh-9rem)] flex-col overflow-hidden shadow-lg">
+            <div className="shrink-0 border-b bg-linear-to-br from-primary/5 to-transparent p-4 md:p-6">
+                <h2 className="text-xl font-bold text-foreground md:text-2xl">
                     Nota Pesanan
                 </h2>
                 <p className="mt-1 text-sm text-muted-foreground">
@@ -51,7 +49,7 @@ export default function OrderPanel({
                 </p>
             </div>
 
-            <ScrollArea className="flex-1 p-4">
+            <div className="min-h-0 flex-1 overflow-y-auto p-3 md:p-4">
                 {orders.length === 0 ? (
                     <div className="flex h-full flex-col items-center justify-center py-12 text-center">
                         <div className="mb-4 flex h-24 w-24 items-center justify-center rounded-full bg-muted">
@@ -150,13 +148,12 @@ export default function OrderPanel({
                         ))}
                     </div>
                 )}
-            </ScrollArea>
+            </div>
 
             {orders.length > 0 && (
-                <div className="absolute right-15 bottom-8 z-50 w-[490px]">
-                    <Separator />
-                    <div className="space-y-4 bg-white p-4 dark:bg-black">
-                        <div className="flex items-center justify-between text-2xl font-bold">
+                <div className="mt-auto shrink-0 border-t bg-background p-3 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)] md:p-4">
+                    <div className="space-y-3">
+                        <div className="flex items-center justify-between text-xl font-bold md:text-2xl">
                             <span className="text-foreground">Total</span>
                             <span className="text-primary">
                                 Rp {total.toLocaleString('id-ID')}
@@ -285,9 +282,7 @@ export default function OrderPanel({
                                     value={
                                         amountGiven === '' ? '' : amountGiven
                                     }
-                                    disabled={exactCash}
                                     onChange={(e) => {
-                                        setExactCash(false);
                                         setAmountGiven(
                                             e.target.value === ''
                                                 ? ''
@@ -295,42 +290,31 @@ export default function OrderPanel({
                                         );
                                     }}
                                 />
-
-                                <div className="mb-2 flex items-center gap-3">
-                                    <input
-                                        id="exact_cash"
-                                        type="checkbox"
-                                        checked={exactCash}
-                                        onChange={(e) => {
-                                            const checked = e.target.checked;
-                                            setExactCash(checked);
-                                            if (checked) setAmountGiven(total);
-                                        }}
-                                        className="h-4 w-4"
-                                    />
-                                    <label
-                                        htmlFor="exact_cash"
-                                        className="text-sm"
-                                    >
-                                        Uang Pas (tepat)
-                                    </label>
-                                </div>
                                 
                                 {/* Quick amount buttons */}
                                 <div className="mt-3 grid grid-cols-3 gap-2">
+                                    <Button
+                                        variant="outline"
+                                        size="sm"
+                                        className="w-full font-bold"
+                                        onClick={() => setAmountGiven(total)}
+                                    >
+                                        Uang Pas
+                                    </Button>
+
                                     {[5000, 10000, 20000, 50000, 100000].map(
                                         (amt) => (
-                                            <button
+                                            <Button
                                                 key={amt}
+                                                variant={"outline"}
                                                 type="button"
-                                                className="flex items-center justify-center rounded-md border bg-white px-3 py-2 text-sm font-medium hover:bg-primary/5"
+                                                className="flex font-bold items-center justify-center rounded-md border px-3 py-2 text-sm hover:bg-primary/5"
                                                 onClick={() => {
-                                                    setExactCash(false);
                                                     setAmountGiven(amt);
                                                 }}
                                             >
                                                 Rp {amt.toLocaleString('id-ID')}
-                                            </button>
+                                            </Button>
                                         ),
                                     )}
                                 </div>
@@ -359,7 +343,6 @@ export default function OrderPanel({
                                 onClick={() => {
                                     setShowPaymentPanel(false);
                                     setAmountGiven('');
-                                    setExactCash(false);
                                 }}
                             >
                                 Batal
@@ -371,7 +354,6 @@ export default function OrderPanel({
                                     onPay(selectedTable, selectedPayment);
                                     setShowPaymentPanel(false);
                                     setAmountGiven('');
-                                    setExactCash(false);
                                 }}
                                 disabled={
                                     selectedPayment === 'tunai' &&

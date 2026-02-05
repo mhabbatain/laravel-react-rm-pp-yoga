@@ -31,14 +31,15 @@ export interface SharedData {
     kategoris: Kategori[];
     menuItems: MenuItem[];
     karyawans: Karyawan[];
-    pesanans?: Pesanan[];
-    pesanan?: Pesanan;
+    transaksis?: Transaksi[];
+    transaksi?: Transaksi;
     currentFilter?: string;
     stats?: Array<{ title: string; value: string }>;
     recentOrders?: Array<RecentOrderItem>;
     flash?: {
         success?: string;
         error?: string;
+        transaksi_id?: number;
     };
     [key: string]: unknown;
 }
@@ -53,8 +54,34 @@ export interface User {
     two_factor_enabled?: boolean;
     created_at: string;
     updated_at: string;
+    menu?: MenuItem;
     karyawan?: Karyawan;
-    [key: string]: unknown;
+}
+
+export interface Karyawan {
+    id: number;
+    nama: string;
+    role: string;
+    no_telepon: string;
+    email?: string;
+    transaksis?: Transaksi[];
+}
+
+export interface Transaksi {
+    id: number;
+    nomor_pesanan: string;
+    id_karyawan?: number;
+    id_user?: number;
+    meja: string; // EnumNomorMeja string value
+    waktu: string;
+    total: number;
+    metode_pembayaran: EnumMetodePembayaran;
+    status: 'pending' | 'selesai' | 'batal';
+    created_at: string;
+    updated_at: string;
+    karyawan?: Karyawan;
+    user?: User;
+    detail_transaksis?: DetailTransaksi[];
 }
 
 interface RecentOrderItem {
@@ -82,41 +109,21 @@ export interface OrderItem extends MenuItem {
     quantity: number;
 }
 
-export interface Karyawan {
+export interface DetailTransaksi {
     id: number;
-    nama: string;
-    jabatan: EnumJabatan;
-    no_telepon: string;
-    pesanans?: Pesanan[];
-}
-
-export interface Pesanan {
-    id: number;
-    meja: EnumNomorMeja;
-    nomor_pesanan: string;
-    waktu: string;
-    total: number;
-    metode_pembayaran: EnumMetodePembayaran;
-    karyawan?: Karyawan;
-    created_at: string;
-    updated_at: string;
-    detail_pesanans?: DetailPesanan[];
-}
-
-export interface DetailPesanan {
-    id: number;
-    pesanan?: Pesanan;
-    menu?: MenuItem;
+    id_transaksi: number;
+    id_menu: number;
     jumlah: number;
     subtotal: number;
     created_at: string;
     updated_at: string;
+    menu?: MenuItem;
 }
 
 // POST KARYAWAN
 export interface AddKaryawanPayload {
     nama: string;
-    jabatan: 'kasir' | 'pelayan' | 'koki' | 'manajer';
+    role: string;
     no_telepon: string;
     email: string;
     password: string;
@@ -126,13 +133,15 @@ export interface AddKaryawanPayload {
 // PUT KARYAWAN
 export interface UpdateKaryawanPayload {
     nama: string;
-    jabatan: 'kasir' | 'pelayan' | 'koki' | 'manajer';
+    role: string;
     no_telepon: string;
+    email: string;
+    password?: string;
 }
 
 export interface KaryawanFormData {
     nama: string;
-    jabatan: 'kasir' | 'pelayan' | 'koki' | 'manajer';
+    role: string;
     no_telepon: string;
     email?: string;
     password?: string;
@@ -140,11 +149,8 @@ export interface KaryawanFormData {
 }
 
 // ENUM KARYAWAN
-export enum EnumJabatan {
+export enum EnumRole {
     Kasir = 'kasir',
-    Pelayan = 'pelayan',
-    Koki = 'koki',
-    Manajer = 'manajer',
 }
 
 // ENUM PESANAN

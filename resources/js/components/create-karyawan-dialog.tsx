@@ -10,26 +10,19 @@ import { Plus } from 'lucide-react';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Label } from './ui/label';
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from './ui/select';
 
 interface CreateKaryawanDialogProps {
     isDialogOpen: boolean;
     setIsDialogOpen: (open: boolean) => void;
     formData: {
         nama: string;
-        jabatan: 'kasir' | 'pelayan' | 'koki' | 'manajer';
+        role: string;
         no_telepon: string;
         email?: string;
         password?: string;
     };
     handleChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
-    handleSelectChange: (field: 'jabatan', value: string) => void;
+    handleSelectChange: (field: 'role', value: string) => void;
     handleAddKaryawan: (e: React.FormEvent<HTMLFormElement>) => void;
 }
 
@@ -72,26 +65,8 @@ export default function CreateKaryawanDialog({
                         />
                     </div>
 
-                    {/* Jabatan */}
-                    <div className="space-y-2">
-                        <Label htmlFor="jabatan">Jabatan</Label>
-                        <Select
-                            value={formData.jabatan}
-                            onValueChange={(value) =>
-                                handleSelectChange('jabatan', value)
-                            }
-                        >
-                            <SelectTrigger id="jabatan">
-                                <SelectValue placeholder="Pilih jabatan" />
-                            </SelectTrigger>
-                            <SelectContent>
-                                <SelectItem value="kasir">Kasir</SelectItem>
-                                <SelectItem value="pelayan">Pelayan</SelectItem>
-                                <SelectItem value="koki">Koki</SelectItem>
-                                <SelectItem value="manajer">Manajer</SelectItem>
-                            </SelectContent>
-                        </Select>
-                    </div>
+                    {/* Role (Hidden/ReadOnly) */}
+                    <input type="hidden" name="role" value="kasir" />
 
                     {/* Nomor Telepon */}
                     <div className="space-y-2">

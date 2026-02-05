@@ -38,7 +38,7 @@ import AppLogoIcon from './app-logo-icon';
 
 const mainNavItems: NavItem[] = [
     {
-        title: 'Beranda',
+        title: 'Dashboard',
         href: beranda(),
         icon: LayoutGrid,
     },

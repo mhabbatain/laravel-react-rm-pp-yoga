@@ -12,15 +12,15 @@ class Karyawan extends Model
 
     protected $fillable = [
         'nama',
-        'jabatan',
+        'role',
         'no_telepon',
         'alamat',
         'user_id',
     ];
 
-    public function pesanans()
+    public function transaksis()
     {
-        return $this->hasMany(Pesanan::class, 'id_karyawan');
+        return $this->hasMany(Transaksi::class, 'id_karyawan');
     }
 
     public function user()

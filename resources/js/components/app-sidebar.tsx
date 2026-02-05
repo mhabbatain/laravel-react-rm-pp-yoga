@@ -11,7 +11,7 @@ import {
 } from '@/components/ui/sidebar';
 import { beranda } from '@/routes';
 import daftarMenu from '@/routes/daftar-menu';
-import daftarPesanan from '@/routes/daftar-pesanan';
+import daftarTransaksi from '@/routes/daftar-transaksi';
 import karyawan from '@/routes/karyawan';
 import pos from '@/routes/pos';
 import { SharedData, type NavItem } from '@/types';
@@ -27,25 +27,25 @@ import AppLogo from './app-logo';
 
 const mainNavItems: NavItem[] = [
     {
-        title: 'Beranda',
+        title: 'Dashboard',
         href: beranda(),
         icon: LayoutGrid,
         isAdminOnly: true,
     },
     {
-        title: 'POS',
+        title: 'Transaksi',
         href: pos.index(),
         icon: Store,
         isAdminOnly: false,
     },
     {
-        title: 'Daftar Pesanan',
-        href: daftarPesanan.index(),
+        title: 'Daftar Transaksi',
+        href: daftarTransaksi.index(),
         icon: FileText,
         isAdminOnly: true,
     },
     {
-        title: 'Karyawan',
+        title: 'Manajemen Karyawan',
         href: karyawan.index(),
         icon: UsersRound,
         isAdminOnly: true,

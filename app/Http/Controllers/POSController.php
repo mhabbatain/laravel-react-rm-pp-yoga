@@ -4,7 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\Kategori;
 use App\Models\Menu;
-use App\Models\Pesanan;
+use App\Models\Transaksi;
+use App\Services\PrintService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -41,20 +42,21 @@ class POSController extends Controller
     {
         // Validasi data dasar dari frontend
         $validated = $request->validate([
-            'id_karyawan' => 'nullable|exists:karyawans,id',
+            // 'id_karyawan' removed. We now use id_user for everyone.
             'id_user' => 'nullable|exists:users,id',
             'meja' => 'required|in:1,2,3,4,5,6,7',
             'metode_pembayaran' => 'required|in:tunai,qris',
-            'detail_pesanans' => 'required|array|min:1',
-            'detail_pesanans.*.id_menu' => 'required|exists:menus,id',
-            'detail_pesanans.*.jumlah' => 'required|integer|min:1',
-            // Hapus validasi subtotal dari sini, hitung ulang di backend
-            // 'detail_pesanans.*.subtotal' => 'required|numeric|min:0',
+            'detail_transaksis' => 'required|array|min:1',
+            'detail_transaksis.*.id_menu' => 'required|exists:menus,id',
+            'detail_transaksis.*.jumlah' => 'required|integer|min:1',
         ]);
 
-        // Validasi: minimal salah satu harus ada (id_karyawan atau id_user)
-        if (empty($validated['id_karyawan']) && empty($validated['id_user'])) {
-            return back()->withInput()->with('error', 'ID Karyawan atau ID User harus diisi.');
+        // Tentukan ID User: jika dikirim di request pakai itu (admin pilih karyawan), 
+        // jika tidak, pakai user yang sedang login.
+        $userId = $validated['id_user'] ?? auth()->id();
+
+        if (empty($userId)) {
+            return back()->withInput()->with('error', 'User ID tidak ditemukan.');
         }
 
         // Mulai database transaction
@@ -65,7 +67,7 @@ class POSController extends Controller
             $detailUntukDisimpan = [];
 
             // 1. Loop untuk validasi stok dan hitung ulang total/subtotal
-            foreach ($validated['detail_pesanans'] as $detail) {
+            foreach ($validated['detail_transaksis'] as $detail) {
                 // Temukan menu dan lock barisnya untuk mencegah race condition stok
                 $menu = Menu::lockForUpdate()->find($detail['id_menu']);
 
@@ -95,10 +97,10 @@ class POSController extends Controller
             // 2. Generate nomor pesanan unik
             $nomorPesanan = 'ORD-' . now()->format('Ymd-His');
 
-            // 3. Simpan pesanan utama
-            $pesanan = Pesanan::create([
-                'id_karyawan' => $validated['id_karyawan'] ?? null,
-                'id_user' => $validated['id_user'] ?? null,
+            // 3. Simpan transaksi utama
+            $transaksi = Transaksi::create([
+                'id_karyawan' => null, // Deprecated, set null
+                'id_user' => $userId, // Use the determined user ID
                 'nomor_pesanan' => $nomorPesanan,
                 'meja' => $validated['meja'],
                 'waktu' => now(),
@@ -106,10 +108,10 @@ class POSController extends Controller
                 'metode_pembayaran' => $validated['metode_pembayaran'],
             ]);
 
-            // 4. Simpan detail pesanan DAN kurangi stok
+            // 4. Simpan detail transaksi DAN kurangi stok
             foreach ($detailUntukDisimpan as $detail) {
                 // Simpan detail ke database
-                $pesanan->detail_pesanans()->create([
+                $transaksi->detailTransaksis()->create([
                     'id_menu' => $detail['id_menu'],
                     'jumlah' => $detail['jumlah'],
                     'subtotal' => $detail['subtotal'],
@@ -125,18 +127,34 @@ class POSController extends Controller
             // Jika semua berhasil, commit transaction
             DB::commit();
 
-            // Redirect dengan pesan sukses
-            return back()->with('success', 'Pesanan berhasil dibuat!');
+            // Redirect dengan pesan sukses dan transaksi_id untuk print
+            return back()->with([
+                'success' => 'Transaksi berhasil dibuat!',
+                'transaksi_id' => $transaksi->id,
+            ]);
         } catch (Throwable $e) {
             // Jika terjadi error, rollback semua perubahan database
             DB::rollBack();
 
             // Tampilkan pesan error ke pengguna
             // Log error untuk developer
-            Log::error('Gagal membuat pesanan: ' . $e->getMessage());
-            return back()->withInput()->with('error', 'Gagal membuat pesanan: ' . $e->getMessage());
+            Log::error('Gagal membuat transaksi: ' . $e->getMessage());
+            return back()->withInput()->with('error', 'Gagal membuat transaksi: ' . $e->getMessage());
         }
 
+    }
+
+    /**
+     * Print receipt for a given order (Browser Print)
+     */
+    public function print(Transaksi $transaksi)
+    {
+        // Load relasi untuk print
+        $transaksi->load(['detailTransaksis.menu', 'karyawan', 'user']);
+
+        return view('print.receipt', [
+            'transaksi' => $transaksi,
+        ]);
     }
 
     /**

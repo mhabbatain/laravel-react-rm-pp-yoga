@@ -47,7 +47,7 @@ export default function Karyawan() {
 
     const [formData, setFormData] = useState<KaryawanFormData>({
         nama: '',
-        jabatan: 'kasir',
+        role: 'kasir',
         no_telepon: '',
         email: '',
         password: '',
@@ -64,7 +64,7 @@ export default function Karyawan() {
     const filteredKaryawans = karyawans.filter(
         (karyawan) =>
             karyawan.nama.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            karyawan.jabatan.toLowerCase().includes(searchQuery.toLowerCase()),
+            karyawan.role.toLowerCase().includes(searchQuery.toLowerCase()),
     );
 
     // status removed
@@ -87,7 +87,7 @@ export default function Karyawan() {
                 setIsDialogOpen(false);
                 setFormData({
                     nama: '',
-                    jabatan: 'kasir',
+                    role: 'kasir',
                     no_telepon: '',
                     email: '',
                     password: '',
@@ -133,8 +133,21 @@ export default function Karyawan() {
                 toast.success('Data karyawan berhasil diperbarui!');
                 setIsEditDialogOpen(false);
             },
-            onError: () => {
-                toast.error('Gagal memperbarui data karyawan!');
+            onError: (errors: Record<string, string>) => {
+                const errorMessages = Object.values(errors);
+                const errorMessage =
+                    errorMessages.length > 0
+                        ? errorMessages[0]
+                        : 'Gagal memperbarui data karyawan!';
+
+                toast.error(errorMessage, {
+                    style: {
+                        backgroundColor: '#fee2e2',
+                        color: '#991b1b',
+                        border: '1px solid #ef4444',
+                    },
+                    icon: '❌',
+                });
             },
         });
     };
@@ -178,7 +191,7 @@ export default function Karyawan() {
                                 <div className="relative">
                                     <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                                     <Input
-                                        placeholder="Cari nama atau jabatan..."
+                                        placeholder="Cari nama atau role..."
                                         value={searchQuery}
                                         onChange={(e) =>
                                             setSearchQuery(e.target.value)
@@ -203,7 +216,7 @@ export default function Karyawan() {
                             <TableHeader>
                                 <TableRow>
                                     <TableHead>Nama Lengkap</TableHead>
-                                    <TableHead>Jabatan</TableHead>
+                                    <TableHead>Role</TableHead>
                                     <TableHead>Nomor Telepon</TableHead>
                                     <TableHead className="text-right">
                                         Aksi
@@ -217,10 +230,10 @@ export default function Karyawan() {
                                             {karyawan.nama}
                                         </TableCell>
                                         <TableCell>
-                                            {karyawan.jabatan
+                                            {karyawan.role
                                                 .charAt(0)
                                                 .toUpperCase() +
-                                                karyawan.jabatan.slice(1)}
+                                                karyawan.role.slice(1)}
                                         </TableCell>
                                         <TableCell>
                                             {karyawan.no_telepon}
@@ -237,10 +250,13 @@ export default function Karyawan() {
                                                         );
                                                         setFormData({
                                                             nama: karyawan.nama,
-                                                            jabatan:
-                                                                karyawan.jabatan,
+                                                            role:
+                                                                karyawan.role,
                                                             no_telepon:
                                                                 karyawan.no_telepon,
+                                                            email:
+                                                                karyawan.email || '',
+                                                            password: '',
                                                         });
                                                         setIsEditDialogOpen(
                                                             true,

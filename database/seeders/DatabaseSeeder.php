@@ -36,8 +36,8 @@ class DatabaseSeeder extends Seeder
             KategoriSeeder::class,
             MenuSeeder::class,
             KaryawanSeeder::class,
-            PesananSeeder::class,
-            DetailPesananSeeder::class
+            TransaksiSeeder::class,
+            DetailTransaksiSeeder::class,
         ]);
     }
 }

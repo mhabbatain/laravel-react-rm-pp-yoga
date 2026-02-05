@@ -11,13 +11,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('karyawans', function (Blueprint $table) {
-            $table->id();
-            $table->string("nama");
-            $table->enum("role", ['kasir']);
-            $table->string("no_telepon");
-            $table->enum("status", ["aktif", "nonaktif"]);
-            $table->timestamps();
+        Schema::table('users', function (Blueprint $table) {
+            $table->string('no_telepon')->nullable()->after('email');
         });
     }
 
@@ -26,6 +21,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('karyawans');
+        Schema::table('users', function (Blueprint $table) {
+            $table->dropColumn('no_telepon');
+        });
     }
 };

@@ -3,7 +3,7 @@
 use App\Http\Controllers\BerandaController;
 use App\Http\Controllers\KaryawanController;
 use App\Http\Controllers\MenuController;
-use App\Http\Controllers\PesananController;
+use App\Http\Controllers\TransaksiController;
 use App\Http\Controllers\POSController;
 use App\Http\Controllers\AiController;
 use Illuminate\Support\Facades\Route;
@@ -21,7 +21,8 @@ Route::middleware(['auth', 'verified', 'kasir'])->group(function () {
     Route::middleware(['admin'])->group(function () {
         Route::get('beranda', [BerandaController::class, 'index'])->name('beranda');
         Route::resource('karyawan', KaryawanController::class);
-        Route::resource('daftar-pesanan', PesananController::class);
+        Route::resource('daftar-transaksi', TransaksiController::class);
+        Route::get('daftar-transaksi/{daftar_transaksi}/print', [TransaksiController::class, 'print'])->name('daftar-transaksi.print');
         Route::resource('daftar-menu', MenuController::class);
         
         // AI Chat endpoint (backend proxy ke Gemini/OpenAI-like API)
@@ -33,6 +34,7 @@ Route::middleware(['auth', 'verified', 'kasir'])->group(function () {
     
     // Halaman POS - bisa diakses admin dan kasir
     Route::resource('pos', POSController::class);
+    Route::get('pos/{transaksi}/print', [POSController::class, 'print'])->name('pos.print');
 });
 
 

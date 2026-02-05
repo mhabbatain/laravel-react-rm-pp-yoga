@@ -2,11 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Karyawan;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
@@ -17,8 +15,21 @@ class KaryawanController extends Controller
      */
     public function index()
     {
+        // Ambil User dengan role 'karyawan' atau 'kasir'
+        $karyawans = User::whereIn('role', ['karyawan', 'kasir'])
+            ->get()
+            ->map(function ($user) {
+                return [
+                    'id' => $user->id,
+                    'nama' => $user->name,
+                    'role' => $user->role,
+                    'no_telepon' => $user->no_telepon,
+                    'email' => $user->email,
+                ];
+            });
+
         return Inertia::render('karyawan', [
-            'karyawans' => Karyawan::all()
+            'karyawans' => $karyawans
         ]);
     }
 
@@ -35,36 +46,28 @@ class KaryawanController extends Controller
      */
     public function store(Request $request)
     {
-
         $validated = $request->validate([
             'nama' => 'required|max:255',
-            'jabatan' => 'required|in:kasir,pelayan,koki,manajer',
             'no_telepon' => [
                 'required',
-                'regex:/^[0-9+() -]+$/', // Biar hanya angka dan simbol telepon umum
+                'regex:/^[0-9+() -]+$/',
                 'max:20',
-                'unique:karyawans,no_telepon' // Memastikan nggak ad nomor yg sama
+                // Cek unik di tabel users
+                'unique:users,no_telepon' 
             ],
             'email' => 'required|email|unique:users,email',
             'password' => 'required|string|min:8',
         ]);
 
-        // Buat user terlebih dahulu, lalu buat karyawan terkait dalam transaksi
-        DB::transaction(function () use ($validated) {
-            $user = User::create([
-                'name' => $validated['nama'],
-                'email' => $validated['email'],
-                'role' => 'karyawan',
-                'password' => Hash::make($validated['password']),
-            ]);
-
-            $karyawan = Karyawan::create([
-                'nama' => $validated['nama'],
-                'jabatan' => $validated['jabatan'],
-                'no_telepon' => $validated['no_telepon'],
-                'user_id' => $user->id,
-            ]);
-        });
+        // Buat user langsung sebagai data karyawan
+        User::create([
+            'name' => $validated['nama'],
+            'email' => $validated['email'],
+            // Default role bisa diset 'kasir' atau 'karyawan' sesuai kebutuhan
+            'role' => 'kasir', 
+            'no_telepon' => $validated['no_telepon'],
+            'password' => Hash::make($validated['password']),
+        ]);
 
         return back()->with('success', 'Karyawan baru berhasil ditambahkan!');
     }
@@ -72,7 +75,7 @@ class KaryawanController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Karyawan $karyawan)
+    public function show(User $karyawan)
     {
         //
     }
@@ -80,30 +83,48 @@ class KaryawanController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(Karyawan $karyawan)
+    public function edit(User $karyawan)
     {
         //
     }
 
     /**
      * Update the specified resource in storage.
+     * Note: Route model binding might need adjustment to bind {karyawan} to User
      */
-    public function update(Request $request, Karyawan $karyawan)
+    public function update(Request $request, $id)
     {
-        //
+        $user = User::findOrFail($id);
+        
         $validated = $request->validate([
             'nama' => 'sometimes|required|max:255',
-            'jabatan' => 'sometimes|required|in:kasir,pelayan,koki,manajer',
             'no_telepon' => [
                 'sometimes',
                 'required',
                 'regex:/^[0-9+() -]+$/',
                 'max:20',
-                'unique:karyawans,no_telepon,' . $karyawan->id,
+                'unique:users,no_telepon,' . $user->id,
             ],
+            'email' => [
+                'sometimes',
+                'required',
+                'email',
+                'unique:users,email,' . $user->id,
+            ],
+            'password' => 'nullable|string|min:8',
         ]);
 
-        $karyawan->update($validated);
+        $userData = [
+            'name' => $validated['nama'] ?? $user->name,
+            'email' => $validated['email'] ?? $user->email,
+            'no_telepon' => $validated['no_telepon'] ?? $user->no_telepon,
+        ];
+
+        if (!empty($validated['password'])) {
+            $userData['password'] = Hash::make($validated['password']);
+        }
+
+        $user->update($userData);
 
         return back()->with('success', 'Data karyawan berhasil diupdate!');
     }
@@ -111,9 +132,10 @@ class KaryawanController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Karyawan $karyawan)
+    public function destroy($id)
     {
-        $karyawan->delete();
+        $user = User::findOrFail($id);
+        $user->delete();
         return back()->with('success', 'Data karyawan berhasil dihapus!');
     }
 }

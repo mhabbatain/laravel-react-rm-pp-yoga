@@ -19,16 +19,16 @@ import {
 } from '@/components/ui/table';
 import AppLayout from '@/layouts/app-layout';
 import { formatDateTime } from '@/lib/utils';
-import daftarPesanan from '@/routes/daftar-pesanan';
-import { BreadcrumbItem, SharedData } from '@/types';
+import daftarTransaksi from '@/routes/daftar-transaksi';
+import { BreadcrumbItem, SharedData, Transaksi } from '@/types';
 import { Head, Link, router, usePage } from '@inertiajs/react';
 import { Calendar, Eye, Search } from 'lucide-react';
 import { useState } from 'react';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
-        title: 'Daftar Pesanan',
-        href: daftarPesanan.index().url,
+        title: 'Daftar Transaksi',
+        href: daftarTransaksi.index().url,
     },
 ];
 
@@ -42,19 +42,27 @@ const filterOptions: { value: FilterPeriode; label: string }[] = [
     { value: 'tahunan', label: 'Tahun Ini' },
 ];
 
-export default function DaftarPesanan() {
+interface DaftarTransaksiProps {
+    transaksis: Transaksi[];
+    currentFilter: FilterPeriode;
+}
+
+export default function DaftarTransaksi({
+    transaksis,
+    currentFilter,
+}: DaftarTransaksiProps) {
     // DATA
-    const { pesanans, currentFilter } = usePage<SharedData>().props;
+    // const { pesanans, currentFilter } = usePage<SharedData>().props; // This line is replaced by the props passed to the component
 
     const [searchQuery, setSearchQuery] = useState('');
     const [selectedFilter, setSelectedFilter] = useState<FilterPeriode>(
-        (currentFilter as FilterPeriode) || 'semua',
+        currentFilter || 'semua',
     );
 
     const handleFilterChange = (value: FilterPeriode) => {
         setSelectedFilter(value);
         router.get(
-            '/daftar-pesanan',
+            '/daftar-transaksi',
             { filter: value },
             {
                 preserveState: true,
@@ -63,8 +71,8 @@ export default function DaftarPesanan() {
         );
     };
 
-    const filteredOrders = pesanans?.filter((pesanan) => {
-        const matchesSearch = pesanan.nomor_pesanan
+    const filteredTransaksis = transaksis?.filter((transaksi) => {
+        const matchesSearch = transaksi.nomor_pesanan
             .toLowerCase()
             .includes(searchQuery.toLowerCase());
         return matchesSearch;
@@ -72,19 +80,19 @@ export default function DaftarPesanan() {
 
     // Hitung total pendapatan dari pesanan yang difilter
     const totalPendapatan =
-        filteredOrders?.reduce((sum, pesanan) => sum + pesanan.total, 0) || 0;
+        filteredTransaksis?.reduce((sum, transaksi) => sum + transaksi.total, 0) || 0;
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title="Daftar Pesanan" />
+            <Head title="Daftar Transaksi" />
             <MainContainer>
                 <div className="flex items-center justify-between">
                     <div>
                         <h1 className="text-3xl font-bold text-foreground">
-                            Daftar Pesanan
+                            Daftar Transaksi
                         </h1>
                         <p className="text-muted-foreground">
-                            Kelola semua pesanan rumah makan
+                            Kelola semua transaksi rumah makan
                         </p>
                     </div>
                 </div>
@@ -137,7 +145,7 @@ export default function DaftarPesanan() {
                 <Card>
                     <CardHeader>
                         <CardTitle>
-                            Pesanan ({filteredOrders?.length})
+                            Transaksi ({filteredTransaksis?.length})
                         </CardTitle>
                     </CardHeader>
                     <CardContent>
@@ -145,7 +153,7 @@ export default function DaftarPesanan() {
                         <Table>
                             <TableHeader>
                                 <TableRow>
-                                    <TableHead>Nomor Pesanan</TableHead>
+                                    <TableHead>Nomor Transaksi</TableHead>
                                     <TableHead>Waktu</TableHead>
                                     <TableHead className="text-center">
                                         Item
@@ -159,32 +167,32 @@ export default function DaftarPesanan() {
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
-                                {filteredOrders?.map((pesanan) => (
+                                {filteredTransaksis?.map((transaksi) => (
                                     <TableRow
-                                        key={pesanan.id}
+                                        key={transaksi.id}
                                         className="cursor-pointer hover:bg-muted/50"
                                     >
                                         <TableCell className="font-medium">
-                                            {pesanan.nomor_pesanan}
+                                            {transaksi.nomor_pesanan}
                                         </TableCell>
                                         <TableCell className="text-muted-foreground">
-                                            {formatDateTime(pesanan.created_at)}
+                                            {formatDateTime(transaksi.created_at)}
                                         </TableCell>
                                         <TableCell className="text-center">
-                                            {pesanan.detail_pesanans?.length ||
+                                            {transaksi.detail_transaksis?.length ||
                                                 0}{' '}
                                             item
                                         </TableCell>
 
                                         <TableCell className="text-right font-semibold">
                                             Rp{' '}
-                                            {pesanan.total.toLocaleString(
+                                            {transaksi.total.toLocaleString(
                                                 'id-ID',
                                             )}
                                         </TableCell>
                                         <TableCell className="text-center">
                                             <Link
-                                                href={`/daftar-pesanan/${pesanan.id}`}
+                                                href={`/daftar-transaksi/${transaksi.id}`}
                                             >
                                                 <Button
                                                     variant="outline"
@@ -200,9 +208,9 @@ export default function DaftarPesanan() {
                             </TableBody>
                         </Table>
                         </div>
-                        {filteredOrders?.length === 0 && (
+                        {filteredTransaksis?.length === 0 && (
                             <div className="py-12 text-center text-muted-foreground">
-                                Tidak ada pesanan yang ditemukan
+                                Tidak ada transaksi yang ditemukan
                             </div>
                         )}
                     </CardContent>

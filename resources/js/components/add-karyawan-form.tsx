@@ -14,7 +14,7 @@ export default function AddKaryawanForm({ closeModal }: KaryawanFormProps) {
         const data = new FormData(form);
         const payload = {
             nama: (data.get('nama') as string) || '',
-            jabatan: (data.get('jabatan') as string) || '',
+            role: 'kasir',
             no_telepon: (data.get('no_telepon') as string) || '',
             email: (data.get('email') as string) || '',
             password: (data.get('password') as string) || '',
@@ -41,21 +41,7 @@ export default function AddKaryawanForm({ closeModal }: KaryawanFormProps) {
                 required
             />
 
-            <label htmlFor="jabatan" className="sr-only">
-                Jabatan
-            </label>
-            <select
-                id="jabatan"
-                name="jabatan"
-                className="w-full rounded border p-2"
-                required
-            >
-                <option value="">Pilih jabatan</option>
-                <option value="kasir">Kasir</option>
-                <option value="pelayan">Pelayan</option>
-                <option value="koki">Koki</option>
-                <option value="manajer">Manajer</option>
-            </select>
+            <input type="hidden" name="role" value="kasir" />
 
             <input
                 name="no_telepon"

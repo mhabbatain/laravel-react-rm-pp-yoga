@@ -2,12 +2,13 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Pesanan;
+use App\Models\Transaksi;
+use App\Services\PrintService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
-class PesananController extends Controller
+class TransaksiController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -16,7 +17,7 @@ class PesananController extends Controller
     {
         $filter = $request->get('filter', 'semua');
         
-        $query = Pesanan::with('detail_pesanans')->orderBy('created_at', 'desc');
+        $query = Transaksi::with('detailTransaksis')->orderBy('created_at', 'desc');
         
         // Filter berdasarkan periode
         switch ($filter) {
@@ -41,10 +42,10 @@ class PesananController extends Controller
                 break;
         }
         
-        $pesanans = $query->get();
+        $transaksis = $query->get();
         
-        return Inertia::render('daftar-pesanan', [
-            'pesanans' => $pesanans,
+        return Inertia::render('daftar-transaksi', [
+            'transaksis' => $transaksis,
             'currentFilter' => $filter,
         ]);
     }
@@ -65,13 +66,26 @@ class PesananController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Pesanan $daftar_pesanan)
+    public function show(Transaksi $daftar_transaksi)
     {
         // Load relasi detail_pesanans dan menu
-        $daftar_pesanan->load('detail_pesanans.menu');
+        $daftar_transaksi->load('detailTransaksis.menu');
 
-        return Inertia::render('daftar-pesanan-detail', [
-            'pesanan' => $daftar_pesanan,
+        return Inertia::render('daftar-transaksi-detail', [
+            'transaksi' => $daftar_transaksi,
+        ]);
+    }
+
+    /**
+     * Print receipt for a given order (Browser Print)
+     */
+    public function print(Transaksi $daftar_transaksi)
+    {
+        // Load relasi untuk print
+        $daftar_transaksi->load(['detailTransaksis.menu', 'karyawan', 'user']);
+
+        return view('print.receipt', [
+            'transaksi' => $daftar_transaksi,
         ]);
     }
 
@@ -94,8 +108,14 @@ class PesananController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Pesanan $pesanan)
+    public function destroy(Transaksi $daftar_transaksi)
     {
-        //
+        // Hapus detail pesanan terlebih dahulu
+        $daftar_transaksi->detailTransaksis()->delete();
+        
+        // Hapus transaksi
+        $daftar_transaksi->delete();
+
+        return to_route('daftar-transaksi.index');
     }
 }

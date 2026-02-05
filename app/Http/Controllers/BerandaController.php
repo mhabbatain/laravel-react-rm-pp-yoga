@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Karyawan;
 use App\Models\Menu;
-use App\Models\Pesanan;
+use App\Models\Transaksi;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -22,7 +22,7 @@ class BerandaController extends Controller
         // --- Ambil Data Statistik ---
 
         // 1. Pesanan Hari Ini (Sudah benar)
-        $pesananHariIni = Pesanan::whereDate('created_at', $today)->count();
+        $pesananHariIni = Transaksi::whereDate('created_at', $today)->count();
 
         // 2. Total Karyawan
         $totalKaryawan = Karyawan::count();
@@ -32,7 +32,7 @@ class BerandaController extends Controller
 
         // 4. Pendapatan Hari Ini
         // <-- Perubahan: Gunakan kolom 'total' sesuai migrasi pesanans
-        $pendapatanHariIniRaw = Pesanan::whereDate('created_at', $today)->sum('total');
+        $pendapatanHariIniRaw = Transaksi::whereDate('created_at', $today)->sum('total');
 
         // --- Format Pendapatan ke Rupiah (Sudah benar) ---
         $formatter = new NumberFormatter('id_ID', NumberFormatter::CURRENCY);
@@ -64,7 +64,7 @@ class BerandaController extends Controller
         // <-- Perubahan: Pilih kolom yang ada di tabel 'pesanans'
         // Tabel 'pesanans' TIDAK memiliki 'nama_pelanggan' atau 'status'.
         // Kita ambil 'nomor_pesanan' sebagai gantinya. Frontend perlu disesuaikan.
-        $recentOrders = Pesanan::select('id', 'nomor_pesanan', 'total') // Pilih kolom yang tersedia
+        $recentOrders = Transaksi::select('id', 'nomor_pesanan', 'total') // Pilih kolom yang tersedia
             ->latest() // Urutkan berdasarkan created_at descending (default)
             ->limit(3)
             ->get();

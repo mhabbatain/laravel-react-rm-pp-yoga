@@ -1,12 +1,13 @@
 import MainContainer from '@/components/main-container';
 import MenuCard from '@/components/menu-card';
 import OrderPanel from '@/components/order-panel';
+import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import AppLayout from '@/layouts/app-layout';
 import pos from '@/routes/pos';
 import { BreadcrumbItem, MenuItem, OrderItem, SharedData } from '@/types';
 import { Head, router, usePage } from '@inertiajs/react';
-import { Coffee, PlusCircle, UtensilsCrossed } from 'lucide-react';
+import { Coffee, PlusCircle, Search, UtensilsCrossed } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 
@@ -31,6 +32,7 @@ export default function POS() {
     const isAdmin = auth.user?.role === 'admin';
 
     const [orders, setOrders] = useState<OrderItem[]>([]);
+    const [searchQuery, setSearchQuery] = useState('');
     const [activeCategory, setActiveCategory] = useState<
         'makanan' | 'minuman' | 'tambahan'
     >('makanan');
@@ -40,13 +42,21 @@ export default function POS() {
         if (flash?.success) {
             toast.success(flash.success, {
                 style: {
-                    // Style sukses (opsional, bisa disamakan)
                     backgroundColor: '#dcfce7',
                     color: '#166534',
                     border: '1px solid #22c55e',
                 },
                 icon: '✅',
             });
+
+            // Auto-print jika ada transaksi_id - buka halaman print di window baru
+            if (flash?.transaksi_id) {
+                window.open(
+                    `/pos/${flash.transaksi_id}/print`,
+                    '_blank',
+                    'width=400,height=600,scrollbars=yes',
+                );
+            }
         }
 
         // Tampilkan toast error jika ada flash error (termasuk "Stok Habis")
@@ -120,7 +130,7 @@ export default function POS() {
         }
 
         // Admin bisa tanpa karyawan, tapi karyawan harus punya id_karyawan
-        if (!isAdmin && !karyawanId) {
+        if (!isAdmin && !userId) {
             toast.error(
                 'Akun Anda tidak terhubung dengan data karyawan. Hubungi admin.',
                 {
@@ -146,7 +156,7 @@ export default function POS() {
             id_user: isAdmin ? userId : null,
             meja: meja,
             metode_pembayaran: metodePembayaran,
-            detail_pesanans: orders.map((item) => ({
+            detail_transaksis: orders.map((item) => ({
                 id_menu: item.id,
                 jumlah: item.quantity,
                 subtotal: item.harga * item.quantity,
@@ -200,10 +210,55 @@ export default function POS() {
                 </div>
 
                 <div className="container mx-auto">
-                    <div className="grid h-[calc(100vh-140px)] grid-cols-1 gap-6 md:grid-cols-3">
+                    <div className="grid h-auto lg:h-[calc(100vh-140px)] grid-cols-1 gap-6 lg:grid-cols-3">
                         {/* Menu Section */}
-                        <div className="flex flex-col md:col-span-2">
-                            <Tabs
+                        <div className="flex flex-col lg:col-span-2">
+                            <div className="mb-4 relative">
+                                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                                <Input
+                                    placeholder="Cari menu..."
+                                    value={searchQuery}
+                                    onChange={(e) => setSearchQuery(e.target.value)}
+                                    className="pl-9 bg-background"
+                                />
+                            </div>
+
+                            {searchQuery ? (
+                                <div className="flex-1 overflow-y-auto rounded-lg border bg-card p-4">
+                                    {menuItems?.filter((item) =>
+                                        item.nama_menu
+                                            .toLowerCase()
+                                            .includes(searchQuery.toLowerCase()),
+                                    ).length === 0 ? (
+                                        <div className="flex h-full flex-col items-center justify-center text-muted-foreground">
+                                            <Search className="mb-2 h-12 w-12 opacity-20" />
+                                            <p>Menu tidak ditemukan</p>
+                                        </div>
+                                    ) : (
+                                        <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 xl:grid-cols-4">
+                                            {menuItems
+                                                ?.filter((item) =>
+                                                    item.nama_menu
+                                                        .toLowerCase()
+                                                        .includes(
+                                                            searchQuery.toLowerCase(),
+                                                        ),
+                                                )
+                                                .map((item) => (
+                                                    <MenuCard
+                                                        key={item.id}
+                                                        item={item}
+                                                        isSelected={isItemSelected(
+                                                            item.id,
+                                                        )}
+                                                        onSelect={handleSelectItem}
+                                                    />
+                                                ))}
+                                        </div>
+                                    )}
+                                </div>
+                            ) : (
+                                <Tabs
                                 value={activeCategory}
                                 onValueChange={(v) =>
                                     setActiveCategory(
@@ -245,7 +300,7 @@ export default function POS() {
                                             value={kat.nama.toLowerCase()}
                                             className="mt-0 flex-1 overflow-y-auto"
                                         >
-                                            <div className="grid grid-cols-2 gap-4 p-2 pb-6 md:grid-cols-3">
+                                            <div className="grid grid-cols-2 gap-4 p-2 pb-6 sm:grid-cols-3 xl:grid-cols-4">
                                                 {filteredItems?.map((item) => (
                                                     <MenuCard
                                                         key={item.id}
@@ -262,11 +317,12 @@ export default function POS() {
                                         </TabsContent>
                                     );
                                 })}
-                            </Tabs>
+                                </Tabs>
+                            )}
                         </div>
 
                         {/* Order Panel */}
-                        <div className="md:col-span-1">
+                        <div className="lg:col-span-1 h-[600px] lg:h-full">
                             <OrderPanel
                                 orders={orders}
                                 onUpdateQuantity={handleUpdateQuantity}

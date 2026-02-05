@@ -17,56 +17,58 @@ import {
 } from '@/components/ui/table';
 import AppLayout from '@/layouts/app-layout';
 import { formatDateTime } from '@/lib/utils';
-import daftarPesanan from '@/routes/daftar-pesanan';
+import daftarTransaksi from '@/routes/daftar-transaksi';
 import {
     BreadcrumbItem,
     EnumMetodePembayaran,
     EnumNomorMeja,
     SharedData,
 } from '@/types';
-import { Head, usePage } from '@inertiajs/react';
-import { ArrowLeft, Edit, Printer } from 'lucide-react';
-import { useState } from 'react';
+import { Head, router, usePage } from '@inertiajs/react';
+import { ArrowLeft, Edit, Loader2, Printer } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { toast } from 'sonner';
 
-export default function DaftarPesananDetail() {
-    const { pesanan: pesananData } = usePage<SharedData>().props;
+export default function DaftarTransaksiDetail() {
+    const { transaksi: transaksiData, flash } = usePage<SharedData>().props;
     const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+    const [isPrinting, setIsPrinting] = useState(false);
 
-    const id = pesananData?.id;
+    const id = transaksiData?.id;
 
     // Fallback jika data not found
-    const pesanan = pesananData ?? {
+    const transaksi = transaksiData ?? {
         id: Number(id),
         nomor_pesanan: `ORD-2024-${id?.toString().padStart(3, '0')}`,
         meja: EnumNomorMeja.Satu, // default fallback
         waktu: '-',
         total: 0,
         metode_pembayaran: EnumMetodePembayaran.Tunai,
-        detail_pesanans: [],
+        detail_transaksis: [],
         created_at: '',
         updated_at: '',
     };
 
     const breadcrumbs: BreadcrumbItem[] = [
         {
-            title: 'Daftar Pesanan',
-            href: daftarPesanan.index().url,
+            title: 'Daftar Transaksi',
+            href: daftarTransaksi.index().url,
         },
         {
-            title: `Detail Pesanan ${id}`,
-            href: id ? daftarPesanan.show(id).url : '#',
+            title: `Detail Transaksi ${id}`,
+            href: id ? daftarTransaksi.show(id).url : '#',
         },
     ];
 
-    const formattedDateTime = formatDateTime(pesanan.created_at);
+    const formattedDateTime = formatDateTime(transaksi.created_at);
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title="DetailDaftarPesanan" />
+            <Head title="Detail Daftar Transaksi" />
             <MainContainer>
                 <div className="flex items-center justify-between">
                     <div className="flex items-center gap-4">
-                        {/* <Link href={`/daftar-pesanan`}>
+                        {/* <Link href={`/daftar-transaksi`}>
                             <Button variant="outline" size="icon">
                                 <ArrowLeft className="h-4 w-4" />
                             </Button>
@@ -81,10 +83,10 @@ export default function DaftarPesananDetail() {
 
                         <div>
                             <h1 className="text-3xl font-bold text-foreground">
-                                Detail Pemesanan
+                                Detail Transaksi
                             </h1>
                             <p className="text-muted-foreground">
-                                Informasi lengkap pesanan
+                                Informasi lengkap transaksi
                             </p>
                         </div>
                     </div>
@@ -102,7 +104,7 @@ export default function DaftarPesananDetail() {
                                     Nomor Pesanan
                                 </p>
                                 <p className="mt-1 text-lg font-semibold text-foreground">
-                                    {pesanan.nomor_pesanan}
+                                    {transaksi.nomor_pesanan}
                                 </p>
                             </div>
                             <div>
@@ -139,7 +141,7 @@ export default function DaftarPesananDetail() {
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
-                                {pesanan.detail_pesanans?.map((item, index) => (
+                                {transaksi.detail_transaksis?.map((item, index) => (
                                     <TableRow key={index}>
                                         <TableCell className="font-medium">
                                             {item.menu?.nama_menu ?? '-'}
@@ -165,7 +167,7 @@ export default function DaftarPesananDetail() {
                                 ))}
 
                                 {/* Jika tidak ada item */}
-                                {pesanan.detail_pesanans?.length === 0 && (
+                                {transaksi.detail_transaksis?.length === 0 && (
                                     <TableRow>
                                         <TableCell
                                             colSpan={4}
@@ -209,7 +211,7 @@ export default function DaftarPesananDetail() {
                                     <span>Grand Total</span>
                                     <span className="text-primary">
                                         Rp{' '}
-                                        {pesanan.total.toLocaleString('id-ID')}
+                                        {transaksi.total.toLocaleString('id-ID')}
                                     </span>
                                 </div>
                             </div>
@@ -227,9 +229,20 @@ export default function DaftarPesananDetail() {
                         <ArrowLeft className="mr-2 h-4 w-4" />
                         Kembali ke Daftar Pesanan
                     </Button>
-                    <Button variant="default" className="flex-1">
+                    <Button
+                        variant="default"
+                        className="flex-1"
+                        onClick={() => {
+                            if (!transaksi.id) return;
+                            window.open(
+                                `/daftar-transaksi/${transaksi.id}/print`,
+                                '_blank',
+                                'width=400,height=600,scrollbars=yes',
+                            );
+                        }}
+                    >
                         <Printer className="mr-2 h-4 w-4" />
-                        Cetak Nota
+                        Cetak Struk
                     </Button>
                     <Button
                         variant="destructive"
@@ -254,7 +267,7 @@ export default function DaftarPesananDetail() {
                             <p>
                                 Apakah Anda yakin ingin menghapus pesanan{' '}
                                 <span className="font-semibold">
-                                    {pesanan.nomor_pesanan}
+                                    {transaksi.nomor_pesanan}
                                 </span>
                                 ?
                             </p>
@@ -264,9 +277,13 @@ export default function DaftarPesananDetail() {
                                     className="flex-1"
                                     onClick={() => {
                                         // Handle delete logic here
-                                        setIsDeleteDialogOpen(false);
-                                        // Redirect back to daftar pesanan after delete
-                                        window.history.back();
+                                        if (transaksi.id) {
+                                            router.delete(daftarTransaksi.destroy(transaksi.id).url, {
+                                                onSuccess: () => {
+                                                    setIsDeleteDialogOpen(false);
+                                                }
+                                            });
+                                        }
                                     }}
                                 >
                                     Hapus

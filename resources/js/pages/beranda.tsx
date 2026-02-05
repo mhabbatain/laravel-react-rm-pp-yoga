@@ -10,21 +10,18 @@ import { useEffect } from 'react';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
-        title: 'Beranda',
+        title: 'Dashboard',
         href: beranda().url,
     },
 ];
 
-// Definisikan tipe untuk data stat (opsional tapi bagus)
+
 interface StatItem {
     title: string;
     value: string;
-    // Tambahkan icon dan color di sini
-    icon: React.ElementType; // Tipe untuk komponen ikon
+    icon: React.ElementType;
     color: string;
 }
-
-// Definisikan tipe untuk recent order (opsional tapi bagus)
 
 export default function Beranda() {
     const { props } = usePage<SharedData>();
@@ -37,7 +34,7 @@ export default function Beranda() {
     if (!statsData || !recentOrders) {
         // Tampilkan loading atau pesan error, atau return null
         // Ini penting karena data mungkin tidak selalu ada
-        return <div>Loading data...</div>; // Contoh sederhana
+        return <div>Loading data...</div>; 
     }
     // Gabungkan data backend dengan ikon/warna frontend
     const stats: StatItem[] = [
@@ -51,18 +48,18 @@ export default function Beranda() {
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title="Beranda" />
+            <Head title="Dashboard" />
             <MainContainer>
                 <div>
                     <h1 className="text-3xl font-bold text-foreground">
-                        Beranda
+                        Dashboard
                     </h1>
                     <p className="text-muted-foreground">
-                        Beranda Sistem POS Rumah Makan Riak Danau
+                        Dashboard Sistem POS Rumah Makan Riak Danau
                     </p>
                 </div>
 
-                {/* Stats Cards - Tidak perlu diubah, sudah menggunakan variabel stats */}
+                
                 <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
                     {stats.map((stat) => {
                         const Icon = stat.icon;
@@ -84,14 +81,14 @@ export default function Beranda() {
                     })}
                 </div>
 
-                {/* Recent Orders - Tidak perlu diubah, sudah menggunakan variabel recentOrders */}
+                
                 <Card>
                     <CardHeader>
                         <div className="flex items-center justify-between">
                             <CardTitle>Pesanan Terbaru</CardTitle>
-                            {/* Sesuaikan Link jika perlu, contoh: ke daftar pesanan */}
+                            
                             <Link
-                                href="/daftar-pesanan" // Ganti ke URL daftar pesanan
+                                href="/daftar-transaksi" 
                                 className="text-sm font-medium text-primary hover:underline"
                             >
                                 Lihat Semua
@@ -107,12 +104,8 @@ export default function Beranda() {
                                 >
                                     <div>
                                         <p className="font-medium text-foreground">
-                                            {/* Tampilkan nomor pesanan */}
                                             {order.nomor_pesanan}
                                         </p>
-                                        {/* <p className="text-sm text-muted-foreground">
-                                            ID: {order.id}
-                                        </p> */}
                                     </div>
                                     <div className="text-right">
                                         <p className="font-semibold text-foreground">
@@ -121,7 +114,6 @@ export default function Beranda() {
                                                 'id-ID',
                                             )}
                                         </p>
-                                        {/* Hapus atau ganti bagian status */}
                                     </div>
                                 </div>
                             ))}
@@ -131,7 +123,7 @@ export default function Beranda() {
 
                 {/* Quick Actions - Sesuaikan href jika perlu */}
                 <div className="grid gap-6 md:grid-cols-3">
-                    <Link href="/daftar-pesanan">
+                    <Link href="/daftar-transaksi">
                         {' '}
                         {/* Ganti URL */}
                         <Card className="cursor-pointer transition-shadow hover:shadow-lg">
@@ -141,10 +133,10 @@ export default function Beranda() {
                                 </div>
                                 <div>
                                     <h3 className="font-semibold text-foreground">
-                                        Kelola Pesanan
+                                        Daftar Transaksi
                                     </h3>
                                     <p className="text-sm text-muted-foreground">
-                                        Lihat detail pesanan
+                                        Lihat Daftar Transaksi  
                                     </p>
                                 </div>
                             </CardContent>
@@ -158,18 +150,17 @@ export default function Beranda() {
                                 </div>
                                 <div>
                                     <h3 className="font-semibold text-foreground">
-                                        Kelola Karyawan
+                                        Manajemen Karyawan
                                     </h3>
                                     <p className="text-sm text-muted-foreground">
-                                        Manajemen karyawan
+                                        Manajemen akun karyawan
                                     </p>
                                 </div>
                             </CardContent>
                         </Card>
                     </Link>
                     <Link href="/daftar-menu">
-                        {' '}
-                        {/* Ganti URL */}
+                        {/* {' '} */}
                         <Card className="cursor-pointer transition-shadow hover:shadow-lg">
                             <CardContent className="flex items-center gap-4 p-6">
                                 <div className="rounded-full bg-success/10 p-3">
@@ -177,7 +168,7 @@ export default function Beranda() {
                                 </div>
                                 <div>
                                     <h3 className="font-semibold text-foreground">
-                                        Kelola Menu
+                                        Daftar Menu
                                     </h3>
                                     <p className="text-sm text-muted-foreground">
                                         Atur menu makanan
@@ -186,7 +177,7 @@ export default function Beranda() {
                             </CardContent>
                         </Card>
                     </Link>
-                    <Link href="/ai-chat">
+                    {/* <Link href="/ai-chat">
                         <Card className="cursor-pointer transition-shadow hover:shadow-lg">
                             <CardContent className="flex items-center gap-4 p-6">
                                 <div className="rounded-full bg-accent/10 p-3">
@@ -202,7 +193,7 @@ export default function Beranda() {
                                 </div>
                             </CardContent>
                         </Card>
-                    </Link>
+                    </Link> */}
                 </div>
             </MainContainer>
         </AppLayout>

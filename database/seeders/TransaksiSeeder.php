@@ -7,7 +7,7 @@ use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 
-class PesananSeeder extends Seeder
+class TransaksiSeeder extends Seeder
 {
     /**
      * Run the database seeds.
@@ -74,7 +74,7 @@ class PesananSeeder extends Seeder
                     $total += $subtotal;
                     
                     $details[] = [
-                        'id_pesanan' => $pesananId,
+                        'id_transaksi' => $pesananId,
                         'id_menu' => $menu->id,
                         'jumlah' => $jumlah,
                         'subtotal' => $subtotal,
@@ -83,8 +83,8 @@ class PesananSeeder extends Seeder
                     ];
                 }
                 
-                // Insert pesanan
-                DB::table('pesanans')->insert([
+                // Insert transaksi
+                DB::table('transaksis')->insert([
                     'id_karyawan' => fake()->randomElement($karyawanIds),
                     'nomor_pesanan' => 'ORD-' . $orderDate->format('Ymd') . '-' . str_pad($orderNumber, 3, '0', STR_PAD_LEFT),
                     'meja' => (string) rand(1, 7),
@@ -95,8 +95,8 @@ class PesananSeeder extends Seeder
                     'updated_at' => $orderDate,
                 ]);
                 
-                // Insert detail pesanan
-                DB::table('detail_pesanans')->insert($details);
+                // Insert detail transaksi
+                DB::table('detail_transaksis')->insert($details);
                 
                 $orderNumber++;
                 $pesananId++;
